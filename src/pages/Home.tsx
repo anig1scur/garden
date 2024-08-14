@@ -1,50 +1,33 @@
 import React, { useRef, useEffect, useState } from 'react';
 import ShapeSVG from '@assets/shape1.svg?raw';
 import { Rnd } from 'react-rnd';
-
-
-type SvgInfo = {
-  pathD: string | undefined;
-  width: number;
-  height: number;
-  viewBox: string | undefined;
-};
-
-type BoxProps = {
-  text: string;
-  bgColor?: string;
-  color?: string;
-};
-
+import { SAMPLE_TEXT, COLOR, RADIUS } from '@/common/const';
+import { useMode } from '@/common/hooks';
+import { Popover } from '@headlessui/react';
+import { BoxItem, BoxProps, SvgInfo } from '@/common/types';
+import Sidebar from '@/components/sidebar';
 
 const randomColor = () => {
-  const list = [
-    "pink",
-    "red",
-    "orange",
-    "yellow",
-    "green",
-    "blue",
-    "indigo",
-  ]
-
-  return list[Math.floor(Math.random() * list.length)];
+  return COLOR[Math.floor(Math.random() * COLOR.length)];
 }
 
-
 const randomRadius = () => {
-  const list = [
-    "rounded-none",
-    "rounded-md",
-    "rounded-xl",
-    "rounded-3xl",
-    "rounded-full",
-  ]
-  return list[Math.floor(Math.random() * list.length)];
+  return RADIUS[Math.floor(Math.random() * RADIUS.length)];
 }
 
 const Rect: React.FC<BoxProps> = ({ text, bgColor, color }) => {
 
+  return (
+    <div
+      style={ { backgroundColor: bgColor, color: color } }
+      className={ `p-3 font-semibold font-mono text-2xl flex justify-center items-center ${ randomRadius() }` }
+    >
+      { text }
+    </div>
+  );
+}
+
+const Circle: React.FC<BoxProps> = ({ text, bgColor, color }) => {
 
   return (
     <div
@@ -124,33 +107,19 @@ const Curve: React.FC<BoxProps> = ({ text, bgColor, color }) => {
 
 
 
-type BoxPosition = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
 
 const Garden: React.FC = () => {
-  const [boxes, setBoxes] = useState<BoxPosition[]>([]);
+  const [boxes, setBoxes] = useState<BoxItem[]>([]);
   const containerWidth = 1000;
   const containerHeight = 1000;
   const centerX = containerWidth / 2;
   const centerY = containerHeight / 2;
 
   const [texts, setTexts] = useState<string[]>([]);
+  const { mode, toggleMode } = useMode();
+  const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
 
-  const sampleTexts = [
-    "BIO",
-    "VITE",
-    "JOY",
-    "MUSIC",
-    "SLEEP",
-    "REACT",
-  ];
-
-  const isOverlapping = (newPos: BoxPosition, existingPositions: BoxPosition[]): boolean => {
+  const isOverlapping = (newPos: BoxItem, existingPositions: BoxItem[]): boolean => {
     return existingPositions.some(pos =>
       newPos.x < pos.x + pos.width &&
       newPos.x + newPos.width > pos.x &&
@@ -159,32 +128,80 @@ const Garden: React.FC = () => {
     );
   };
 
-  const generateSpiralPosition = (index: number, baseSize: number): BoxPosition => {
-    const angle = index * 0.5
+  const handleBoxChange = (index: number, newPosition: { x: number; y: number; width: number; height: number }) => {
+    setBoxes(prevBoxes =>
+      prevBoxes.map((box, i) =>
+        i === index ? { ...box, ...newPosition } : box
+      )
+    );
+  };
+  const generateSpiralBox = (index: number, baseSize: number): BoxItem => {
+    const angle = index * 0.5;
     const radius = baseSize * Math.sqrt(index);
-    const x = centerX + radius * Math.cos(angle) - baseSize / 2
-    const y = centerY + radius * Math.sin(angle) - baseSize / 2
+    const x = centerX + radius * Math.cos(angle) - baseSize / 2;
+    const y = centerY + radius * Math.sin(angle) - baseSize / 2;
     const size = baseSize * (1 - index * 0.001);
-    return { x, y, width: size, height: size };
+    const _texts = texts.length === 0 ? SAMPLE_TEXT : texts;
+    const text = _texts[index % _texts.length];
+    const bgColor = randomColor();
+    const color = 'white';
+
+    return {
+      x,
+      y,
+      width: size,
+      height: size,
+      text,
+      bgColor,
+      color,
+      href: undefined,
+      desc: undefined
+    };
   };
 
   useEffect(() => {
-    const newSvgs: BoxPosition[] = [];
-    const numSvgs = 12;
+    const newBoxes: BoxItem[] = [];
+    const numBoxes = 12;
     const baseSize = 90;
 
-    for (let i = 0;i < numSvgs;i++) {
-      let newPosition: BoxPosition;
+    for (let i = 0;i < numBoxes;i++) {
+      let newBox: BoxItem;
       let attempts = 0;
       const maxAttempts = 100;
 
       do {
-        newPosition = generateSpiralPosition(attempts, baseSize);
+        newBox = generateSpiralBox(attempts, baseSize);
         attempts++;
-      } while (isOverlapping(newPosition, newSvgs) && attempts < maxAttempts);
+      } while (isOverlapping(newBox, newBoxes) && attempts < maxAttempts);
 
       if (attempts < maxAttempts) {
-        newSvgs.push(newPosition);
+        newBoxes.push(newBox);
+      } else {
+        console.log(`Couldn't place box ${ i } after ${ maxAttempts } attempts`);
+      }
+    }
+
+    setBoxes(newBoxes);
+  }, [texts]);
+
+
+  useEffect(() => {
+    const newSvgs: BoxItem[] = [];
+    const numSvgs = 12;
+    const baseSize = 90;
+
+    for (let i = 0;i < numSvgs;i++) {
+      let newBox: BoxItem;
+      let attempts = 0;
+      const maxAttempts = 100;
+
+      do {
+        newBox = generateSpiralBox(attempts, baseSize);
+        attempts++;
+      } while (isOverlapping(newBox, newSvgs) && attempts < maxAttempts);
+
+      if (attempts < maxAttempts) {
+        newSvgs.push(newBox);
       } else {
         console.log(`Couldn't place SVG ${ i } after ${ maxAttempts } attempts`);
       }
@@ -193,35 +210,91 @@ const Garden: React.FC = () => {
     setBoxes(newSvgs);
   }, []);
 
+  const handleNewBoxCreate = (newBox: Omit<BoxItem, 'x' | 'y' | 'width' | 'height'>) => {
+    const baseSize = 90;
+    const newPosition = generateSpiralBox(boxes.length, baseSize);
+    setBoxes(prevBoxes => [...prevBoxes, { ...newPosition, ...newBox }]);
+  };
+
   return (
     <div className='flex flex-col justify-center items-center h-screen'>
+      <Sidebar
+        selectedBox={ selectedBoxIndex !== null ? boxes[selectedBoxIndex] : null }
+        onBoxChange={ (updatedBox) => {
+          if (selectedBoxIndex !== null) {
+            handleBoxChange(selectedBoxIndex, updatedBox);
+          }
+        } }
+        onNewBoxCreate={ handleNewBoxCreate }
+      />
       <div className='flex mt-10 gap-10 items-center'>
         <div className='text-white text-4xl font-bold'>Garden</div>
-        <textarea className='w-full h-16 p-2 rounded-xl bg-white font-semibold placeholder:text-zinc-400' placeholder='What makes you you?' onChange={ (e) => setTexts(e.target.value.split('\n').filter(
-          (text) => text.length > 0 && text.length < 12
-        )) } />
+        <button
+          onClick={ toggleMode }
+          className='px-4 py-2 bg-blue-500 text-white rounded-md'
+        >
+          { mode === 'edit' ? 'Editing' : 'Viewing' }
+        </button>
       </div>
-      <div style={ { width: containerWidth, height: containerHeight, position: 'relative', overflow: 'hidden' } }>
+      <div
+        onClick={ () => setSelectedBoxIndex(null) }
+        style={ { width: containerWidth, height: containerHeight, position: 'relative', overflow: 'hidden' } }>
         { boxes.map((box, index) => {
-
-          const _texts = texts.length === 0 ? sampleTexts : texts;
-
-          const text = _texts[index % _texts.length];
-          const bgColor = randomColor();
+          const BoxComponent = index % 2 === 0 ? Curve : Rect;
           return (
-            <Rnd
-              default={ {
-                x: box.x,
-                y: box.y,
-                width: box.width,
-                height: box.height,
-              } } >
-              {
-                index % 2 === 0 ?
-                  <Curve text={ text } bgColor={ bgColor } color='white' /> :
-                  <Rect text={ text } bgColor={ 'white' } color='black' />
-              }
-            </Rnd>
+            <Popover key={ index }>
+              { ({ open }) => (
+                <>
+                  <Popover as="div">
+                    <Rnd
+                      default={ {
+                        x: box.x,
+                        y: box.y,
+                        width: box.width,
+                        height: box.height,
+                      } }
+                      disableDragging={ mode === 'view' }
+                      enableResizing={ mode === 'edit' }
+                      onDragStop={ (e, d) => {
+                        if (mode === 'edit') {
+                          handleBoxChange(index, { ...box, x: d.x, y: d.y });
+                        }
+                      } }
+                      onResizeStop={ (e, direction, ref, delta, position) => {
+                        if (mode === 'edit') {
+                          handleBoxChange(index, {
+                            x: position.x,
+                            y: position.y,
+                            width: ref.offsetWidth,
+                            height: ref.offsetHeight,
+                          });
+                        }
+                      } }
+                      onClick={ (e: React.MouseEvent) => {
+                        e.stopPropagation();
+
+                        if (mode === 'edit') {
+                          setSelectedBoxIndex(index);
+                        } else if (box.href) {
+                          window.open(box.href, '_blank');
+                        }
+                      } }
+                    >
+                      <BoxComponent
+                        text={ box.text }
+                        bgColor={ box.bgColor }
+                        color={ box.color }
+                      />
+                    </Rnd>
+                  </Popover>
+                  { mode === 'view' && box.desc && (
+                    <Popover className="absolute z-10 bg-white p-2 rounded shadow-lg">
+                      { box.desc }
+                    </Popover>
+                  ) }
+                </>
+              ) }
+            </Popover>
           );
         }) }
       </div>
@@ -229,11 +302,10 @@ const Garden: React.FC = () => {
   );
 };
 
+
 const App: React.FC = () => {
   return (
-    <div className='bg-black'>
-      <Garden />
-    </div>
+    <Garden />
   );
 };
 
