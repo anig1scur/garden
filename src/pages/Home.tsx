@@ -3,7 +3,7 @@ import ShapeSVG from '@assets/shape1.svg?raw';
 import { Rnd } from 'react-rnd';
 import { SAMPLE_TEXT, COLOR, RADIUS } from '@/common/const';
 import { useMode } from '@/common/hooks';
-import { Popover } from '@headlessui/react';
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { BoxItem, BoxProps, SvgInfo } from '@/common/types';
 import Sidebar from '@/components/sidebar';
 
@@ -154,8 +154,6 @@ const Garden: React.FC = () => {
       text,
       bgColor,
       color,
-      href: undefined,
-      desc: undefined
     };
   };
 
@@ -242,58 +240,55 @@ const Garden: React.FC = () => {
         { boxes.map((box, index) => {
           const BoxComponent = index % 2 === 0 ? Curve : Rect;
           return (
-            <Popover key={ index }>
-              { ({ open }) => (
-                <>
-                  <Popover as="div">
-                    <Rnd
-                      default={ {
-                        x: box.x,
-                        y: box.y,
-                        width: box.width,
-                        height: box.height,
-                      } }
-                      disableDragging={ mode === 'view' }
-                      enableResizing={ mode === 'edit' }
-                      onDragStop={ (e, d) => {
-                        if (mode === 'edit') {
-                          handleBoxChange(index, { ...box, x: d.x, y: d.y });
-                        }
-                      } }
-                      onResizeStop={ (e, direction, ref, delta, position) => {
-                        if (mode === 'edit') {
-                          handleBoxChange(index, {
-                            x: position.x,
-                            y: position.y,
-                            width: ref.offsetWidth,
-                            height: ref.offsetHeight,
-                          });
-                        }
-                      } }
-                      onClick={ (e: React.MouseEvent) => {
-                        e.stopPropagation();
+            <Popover key={ index } >
+              <Rnd
+                default={ {
+                  x: box.x,
+                  y: box.y,
+                  width: box.width,
+                  height: box.height,
+                } }
+                disableDragging={ mode === 'view' }
+                enableResizing={ mode === 'edit' }
+                onDragStop={ (e, d) => {
+                  if (mode === 'edit') {
+                    handleBoxChange(index, { ...box, x: d.x, y: d.y });
+                  }
+                } }
+                onResizeStop={ (e, direction, ref, delta, position) => {
+                  if (mode === 'edit') {
+                    handleBoxChange(index, {
+                      x: position.x,
+                      y: position.y,
+                      width: ref.offsetWidth,
+                      height: ref.offsetHeight,
+                    });
+                  }
+                } }
+                onClick={ (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  if (mode === 'edit') {
+                    setSelectedBoxIndex(index);
+                  } else if (box.href) {
+                    window.open(box.href, '_blank');
+                  }
+                } }
+              >
+                <PopoverButton>
+                  <BoxComponent
+                    text={ box.text }
+                    bgColor={ box.bgColor }
+                    color={ box.color }
+                  />
+                </PopoverButton>
+              </Rnd>
+              { mode === 'view' && box.desc && (
 
-                        if (mode === 'edit') {
-                          setSelectedBoxIndex(index);
-                        } else if (box.href) {
-                          window.open(box.href, '_blank');
-                        }
-                      } }
-                    >
-                      <BoxComponent
-                        text={ box.text }
-                        bgColor={ box.bgColor }
-                        color={ box.color }
-                      />
-                    </Rnd>
-                  </Popover>
-                  { mode === 'view' && box.desc && (
-                    <Popover className="absolute z-10 bg-white p-2 rounded shadow-lg">
-                      { box.desc }
-                    </Popover>
-                  ) }
-                </>
-              ) }
+                <PopoverPanel transition anchor="bottom"
+                  className="p-2 rounded-xl bg-white mt-2 text-sm/6 transition duration-200 ease-in-out [--anchor-gap:var(--spacing-5)] data-[closed]:-translate-y-1 data-[closed]:opacity-0"
+                >
+                  { box.desc }
+                </PopoverPanel>) }
             </Popover>
           );
         }) }

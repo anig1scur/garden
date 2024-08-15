@@ -1,5 +1,5 @@
 import React from 'react';
-import { BoxItem } from '../common/types'; // 假设我们在单独的文件中定义了类型
+import { BoxItem } from '../common/types';
 
 type SidebarProps = {
   selectedBox: BoxItem | null;
