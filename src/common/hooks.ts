@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 type Mode = 'edit' | 'view';
 
-export const useMode = (initialMode: Mode = 'view') => {
+export const useMode = (initialMode: Mode = 'edit') => {
   const [mode, setMode] = useState<Mode>(initialMode);
 
   const toggleMode = () => {

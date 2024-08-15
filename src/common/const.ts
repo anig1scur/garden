@@ -1,14 +1,5 @@
 
-const COLOR = [
-  "red",
-  "orange",
-  "green",
-  "blue",
-  "indigo",
-  "gray",
-  "salmon",
-]
-
+const COLOR = ["#E275E4", "#E6CE3B", "#E73F40", "#2179E0", "#7962E7", "#3DB150", "#E8E8E6"];
 const SAMPLE_TEXT = [
   "BIO",
   "VITE",
@@ -20,8 +11,7 @@ const SAMPLE_TEXT = [
 
 const RADIUS = [
   "rounded-none",
-  "rounded-md",
-  "rounded-xl",
+  "rounded-lg",
   "rounded-3xl",
   "rounded-full",
 ]
