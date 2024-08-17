@@ -1,4 +1,4 @@
-const data = [
+export const data = [
   {
     "key": {
       "en": "Sichuaner",
@@ -7,16 +7,6 @@ const data = [
     "desc": {
       "cn": "我出生成长于四川东北的一个小镇。",
       "en": "I was born and raised in a small town in northeastern Sichuan."
-    }
-  },
-  {
-    "key": {
-      "en": "Spicy & Sour",
-      "cn": "酸辣"
-    },
-    "desc": {
-      "cn": "我最喜欢的食物的口味是酸辣。两者都有是最好，但仅有其一也未尝不可。",
-      "en": "My favorite food flavors are spicy and sour. Having both is best, but either one alone is also good. I like dishes like Suan La Fen, Luosifen, and Hunan cuisine."
     }
   },
   {
@@ -37,6 +27,16 @@ const data = [
     "desc": {
       "cn": "蓝天白云很好，但我也喜欢雷雨天的夜里放些 jazz 音乐时给人意乱情迷的感觉。",
       "en": "Clear blue skies are nice, but I also love the intoxicating feeling of listening to jazz music on a stormy night."
+    }
+  },
+  {
+    "key": {
+      "en": "Spicy & Sour",
+      "cn": "酸辣"
+    },
+    "desc": {
+      "cn": "我最喜欢的食物的口味是酸辣。两者都有是最好，但仅有其一也未尝不可。",
+      "en": "My favorite food flavors are spicy and sour. Having both is best, but either one alone is also good. I like dishes like Suan La Fen, Luosifen, and Hunan cuisine."
     }
   },
   {

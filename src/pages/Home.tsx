@@ -1,13 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import ShapeSVG from '@assets/shape1.svg?raw';
 import { Rnd } from 'react-rnd';
-import { SAMPLE_TEXT, COLOR, RADIUS } from '@/common/const';
-import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
+import { COLOR, RADIUS } from '@/common/const';
 import { BoxItem, BoxProps, SvgInfo, PosProps } from '@/common/types';
 import Sidebar from '@/components/sidebar';
 import TextFit from '@/components/textfit';
+import { data } from '@/common/mock';
 import { ModeProvider, useModeContext } from '@/common/context';
-
+import { motion, Variants } from 'framer-motion';
 const randomColor = () => {
   return COLOR[Math.floor(Math.random() * COLOR.length)];
 }
@@ -130,7 +130,8 @@ const Garden: React.FC = () => {
     const x = centerX + radius * Math.cos(angle) - baseSize / 2;
     const y = centerY + radius * Math.sin(angle) - baseSize / 2;
     const size = baseSize * (1 - index * 0.001);
-    const text = SAMPLE_TEXT[index % SAMPLE_TEXT.length];
+    const text = data[index].key.cn;
+    const desc = data[index].desc.cn;
     const bgColor = randomColor();
     const borderRadius = randomRadius();
     const color = 'black';
@@ -143,13 +144,15 @@ const Garden: React.FC = () => {
       text,
       bgColor,
       color,
+      desc,
       className: borderRadius,
     };
   };
 
+
   useEffect(() => {
     const newBoxes: BoxItem[] = [];
-    const numBoxes = 12;
+    const numBoxes = 19;
     const baseSize = 90;
 
     for (let i = 0;i < numBoxes;i++) {
@@ -172,11 +175,36 @@ const Garden: React.FC = () => {
     setBoxes(newBoxes);
   }, []);
 
+
+
   const handleNewBoxCreate = (newBox: Omit<BoxItem, 'x' | 'y' | 'width' | 'height'>) => {
     const baseSize = 90;
     const newPosition = generateSpiralBox(boxes.length, baseSize);
     setBoxes(prevBoxes => [...prevBoxes, { ...newPosition, ...newBox }]);
   };
+
+  const boxVariants: Variants = {
+
+    hover: {
+      scale: 1.5,
+      transition: {
+        duration: 0.2,
+        staggerChildren: 0.1,
+      },
+      zIndex: 999,
+    }
+  }
+
+  const variants: Variants = {
+    rest: {
+      display: "none",
+      opacity: 0,
+    },
+    hover: {
+      display: "block",
+      opacity: 1,
+    }
+  }
 
   return (
     <div className='flex justify-center p-10'>
@@ -190,7 +218,7 @@ const Garden: React.FC = () => {
         onNewBoxCreate={ handleNewBoxCreate }
       />
       <div className='relative w-full h-svh mt-10'>
-        <div className='absolute top-0 left-0 w-full h-full opacity-50' />
+        <div className='absolute top-0 left-0 w-full h-full opacity-80' />
         { boxes.map((box, index) => {
           const BoxComponent = index % 2 === 0 ? Curve : Rect;
           return (
@@ -228,21 +256,24 @@ const Garden: React.FC = () => {
                   { ...box }
                 />
               </Rnd>) : (
-              <Popover key={ index } style={ { position: 'absolute', left: box.x, top: box.y } }>
-                <PopoverButton>
-                  <BoxComponent
-                    { ...box }
-                  />
-                </PopoverButton>
-                <PopoverPanel className="bg-white">
+              <motion.div initial="rest" whileHover={ "hover" } animate="rest" variants={ boxVariants } style={ { position: 'absolute', left: box.x, top: box.y } }>
+                <BoxComponent
+
+                  { ...box }
+                />
+                <motion.div
+                  className='absolute backdrop-blur-sm top-[100%] right-0 p-3 bg-white bg-opacity-50'
+
+                  variants={ variants }
+                >
                   { box.desc }
-                </PopoverPanel>
-              </Popover>
+                </motion.div>
+
+              </motion.div>
             )
           );
         }) }
       </div>
-      {/* </div> */ }
     </div>
   );
 };
