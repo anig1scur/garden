@@ -124,24 +124,27 @@ const Garden: React.FC = () => {
     );
   };
 
-  const generateSpiralBox = (index: number, baseSize: number): BoxItem => {
-    const angle = index * 0.5;
-    const radius = baseSize * Math.sqrt(index);
+  const generateSpiralBox = (attempts: number, index: number, baseSize: number): BoxItem => {
+    const angle = attempts * 0.5;
+    const radius = baseSize * Math.sqrt(attempts);
     const x = centerX + radius * Math.cos(angle) - baseSize / 2;
     const y = centerY + radius * Math.sin(angle) - baseSize / 2;
-    const size = baseSize * (1 - index * 0.001);
+    const size = baseSize * (1 - attempts * 0.001);
     const text = data[index].key.cn;
     const desc = data[index].desc.cn;
+    const href = data[index].href || '';
     const bgColor = randomColor();
     const borderRadius = randomRadius();
     const color = 'black';
 
+    console.log(text)
     return {
       x,
       y,
       width: size,
       height: size,
       text,
+      href,
       bgColor,
       color,
       desc,
@@ -152,21 +155,23 @@ const Garden: React.FC = () => {
 
   useEffect(() => {
     const newBoxes: BoxItem[] = [];
-    const numBoxes = 19;
+    const numBoxes = data.length;
     const baseSize = 90;
+    let index = 0;
 
-    for (let i = 0;i < numBoxes;i++) {
+    for (let i = 0;index < numBoxes;i++) {
       let newBox: BoxItem;
       let attempts = 0;
       const maxAttempts = 100;
 
       do {
-        newBox = generateSpiralBox(attempts, baseSize);
+        newBox = generateSpiralBox(attempts, index, baseSize);
         attempts++;
       } while (isOverlapping(newBox, newBoxes) && attempts < maxAttempts);
 
       if (attempts < maxAttempts) {
         newBoxes.push(newBox);
+        index += 1;
       } else {
         console.log(`Couldn't place box ${ i } after ${ maxAttempts } attempts`);
       }
@@ -268,7 +273,6 @@ const Garden: React.FC = () => {
                 >
                   { box.desc }
                 </motion.div>
-
               </motion.div>
             )
           );
