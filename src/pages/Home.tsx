@@ -260,6 +260,8 @@ const Garden: React.FC = () => {
         } }
         onNewBoxCreate={ handleNewBoxCreate }
       />
+      <div className='bg-slate-400 h-fit' onClick={saveGarden}>Save Garden</div>
+
       <div className='relative w-full h-svh mt-10'>
         <div className='absolute top-0 left-0 w-full h-full opacity-80' />
         { boxes.map((box, index) => {

@@ -6,7 +6,14 @@ import path from 'path';
 export default defineConfig(({ }) => {
   return {
     server: {
-      hmr: true
+      hmr: true,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     plugins: [
       svgr({

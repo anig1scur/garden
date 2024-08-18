@@ -12,9 +12,9 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     /* Modules */
-    "module": "es2020",
     "moduleResolution": "node",
     "baseUrl": "./src",
+    "module": "commonjs",
     "paths": {
       "@/*": [
         "*"
@@ -42,9 +42,11 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.js",
-    "src/**/*.jsx", "src/tools/extractScripts.ts",
+    "src/**/*.jsx",
+    "api/**/*",
   ],
   "exclude": [
     "node_modules"
   ]
+  
 }
