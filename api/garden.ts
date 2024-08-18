@@ -1,11 +1,14 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { MongoClient } from 'mongodb';
+import { cors } from './_cors';
 
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri || 'mongodb://localhost:27017/garden');
 
 export default async (req: VercelRequest, res: VercelResponse) => {
-  const { id } = req.query;
+  if (cors(req, res)) return;
+
+  const id = req.url?.split('/').pop();
 
   try {
     await client.connect();
@@ -29,7 +32,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       res.status(200).json({ message: 'Garden updated successfully' });
     } else {
       res.setHeader('Allow', ['GET', 'PUT']);
-      res.status(405).end(`Method ${req.method} Not Allowed`);
+      res.status(405).end(`Method ${ req.method } Not Allowed`);
     }
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

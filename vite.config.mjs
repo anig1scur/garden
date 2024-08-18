@@ -5,11 +5,13 @@ import path from 'path';
 
 export default defineConfig(({ }) => {
   return {
+    base: "./",
     server: {
       hmr: true,
       proxy: {
         '/api': {
           target: 'http://localhost:3000',
+          followRedirects: true,
           changeOrigin: true,
           secure: false,
         },

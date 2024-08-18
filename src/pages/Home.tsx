@@ -117,14 +117,14 @@ const Garden: React.FC = () => {
     if (id) {
       fetchGarden(id);
     } else {
-      // 初始化新的花园
-      setBoxes([]); // 或者设置一些默认的盒子
+      initBoxes();
     }
   }, [id]);
 
   const fetchGarden = async (id: string) => {
+    console.log('fetching garden:', id);
     try {
-      const response = await axios.get<{ boxes: BoxItem[] }>(`/api/gardens/${id}`);
+      const response = await axios.get<{ boxes: BoxItem[] }>(`https://wmmm.vercel.app/api/gardens/${ id }`);
       setBoxes(response.data.boxes);
       setGardenId(id);
     } catch (error) {
@@ -135,11 +135,11 @@ const Garden: React.FC = () => {
   const saveGarden = async () => {
     try {
       if (gardenId) {
-        await axios.put(`/api/gardens/${gardenId}`, { boxes });
+        await axios.put(`https://wmmm.vercel.app/api/gardens/${ gardenId }`, { boxes });
       } else {
-        const response = await axios.post<{ id: string }>('/api/gardens', { boxes });
+        const response = await axios.post<{ id: string }>('https://wmmm.vercel.app/api/gardens', { boxes });
         setGardenId(response.data.id);
-        navigate(`/garden/${response.data.id}`);
+        navigate(`/${ response.data.id }`);
       }
     } catch (error) {
       console.error('Failed to save garden:', error);
@@ -191,7 +191,8 @@ const Garden: React.FC = () => {
   };
 
 
-  useEffect(() => {
+  const initBoxes = React.useCallback(() => {
+
     const newBoxes: BoxItem[] = [];
     const numBoxes = data.length;
     const baseSize = 90;
@@ -260,7 +261,7 @@ const Garden: React.FC = () => {
         } }
         onNewBoxCreate={ handleNewBoxCreate }
       />
-      <div className='bg-slate-400 h-fit' onClick={saveGarden}>Save Garden</div>
+      <div className='bg-pink-500 text-white w-36 text-center rounded-sm h-fit p-1' onClick={ saveGarden }>Save Garden</div>
 
       <div className='relative w-full h-svh mt-10'>
         <div className='absolute top-0 left-0 w-full h-full opacity-80' />

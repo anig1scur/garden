@@ -1,11 +1,14 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { MongoClient } from 'mongodb';
 import { nanoid } from 'nanoid';
+import { cors } from './_cors';
 
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri || 'mongodb://localhost:27017/garden');
 
 export default async (req: VercelRequest, res: VercelResponse) => {
+  if (cors(req, res)) return;
+
   if (req.method === 'POST') {
     try {
       await client.connect();
@@ -14,7 +17,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
       const id = nanoid();
       const result = await gardens.insertOne({ id, boxes: req.body.boxes });
-
       res.status(200).json({ id });
     } catch (error) {
       console.error('Failed to create garden:', error);

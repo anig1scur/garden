@@ -6,6 +6,10 @@ const routes = [
     path: '/',
     element: <Home />,
   },
+  {
+    path: '/:id',
+    element: <Home />,
+  }
 
 ] as RouteObject[];
 
