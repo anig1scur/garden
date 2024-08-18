@@ -1,6 +1,8 @@
+import axios from 'axios';
 import React, { useRef, useEffect, useState } from 'react';
 import ShapeSVG from '@assets/shape1.svg?raw';
 import { Rnd } from 'react-rnd';
+import { useParams, useNavigate } from 'react-router-dom';
 import { COLOR, RADIUS } from '@/common/const';
 import { BoxItem, BoxProps, SvgInfo, PosProps } from '@/common/types';
 import Sidebar from '@/components/sidebar';
@@ -98,7 +100,6 @@ const Curve: React.FC<BoxProps> = ({ text, bgColor, color }) => {
 };
 
 const Garden: React.FC = () => {
-  const [boxes, setBoxes] = useState<BoxItem[]>([]);
   const containerWidth = screen.availWidth * 0.8;
   const containerHeight = screen.availHeight * 0.8;
   const centerX = containerWidth / 2;
@@ -106,6 +107,44 @@ const Garden: React.FC = () => {
 
   const { mode } = useModeContext();
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
+
+  const [boxes, setBoxes] = useState<BoxItem[]>([]);
+  const [gardenId, setGardenId] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (id) {
+      fetchGarden(id);
+    } else {
+      // 初始化新的花园
+      setBoxes([]); // 或者设置一些默认的盒子
+    }
+  }, [id]);
+
+  const fetchGarden = async (id: string) => {
+    try {
+      const response = await axios.get<{ boxes: BoxItem[] }>(`/api/gardens/${id}`);
+      setBoxes(response.data.boxes);
+      setGardenId(id);
+    } catch (error) {
+      console.error('Failed to fetch garden:', error);
+    }
+  };
+
+  const saveGarden = async () => {
+    try {
+      if (gardenId) {
+        await axios.put(`/api/gardens/${gardenId}`, { boxes });
+      } else {
+        const response = await axios.post<{ id: string }>('/api/gardens', { boxes });
+        setGardenId(response.data.id);
+        navigate(`/garden/${response.data.id}`);
+      }
+    } catch (error) {
+      console.error('Failed to save garden:', error);
+    }
+  };
 
   const isOverlapping = (newPos: BoxItem, existingPositions: BoxItem[]): boolean => {
     return existingPositions.some(pos =>
@@ -130,14 +169,13 @@ const Garden: React.FC = () => {
     const x = centerX + radius * Math.cos(angle) - baseSize / 2;
     const y = centerY + radius * Math.sin(angle) - baseSize / 2;
     const size = baseSize * (1 - attempts * 0.001);
-    const text = data[index].key.cn;
-    const desc = data[index].desc.cn;
+    const text = data[index].key.en;
+    const desc = data[index].desc.en;
     const href = data[index].href || '';
     const bgColor = randomColor();
     const borderRadius = randomRadius();
     const color = 'black';
 
-    console.log(text)
     return {
       x,
       y,
@@ -184,7 +222,7 @@ const Garden: React.FC = () => {
 
   const handleNewBoxCreate = (newBox: Omit<BoxItem, 'x' | 'y' | 'width' | 'height'>) => {
     const baseSize = 90;
-    const newPosition = generateSpiralBox(boxes.length, baseSize);
+    const newPosition = generateSpiralBox(boxes.length, data.length + 1, baseSize);
     setBoxes(prevBoxes => [...prevBoxes, { ...newPosition, ...newBox }]);
   };
 
