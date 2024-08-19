@@ -5,9 +5,8 @@
     { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
   ],
   "routes": [
-    { "src": "/api/gardens", "dest": "/api/gardens.ts" },
-    { "src": "/api/gardens/.*", "dest": "/api/garden.ts" },
-    { "src": "^/static/(.*)", "dest": "/static/$1" },
+    { "src": "/gardens", "dest": "/api/gardens.ts" },
+    { "src": "/gardens/.*", "dest": "/api/garden.ts" },
     { "src": ".*", "dest": "/index.html" }
   ]
 }

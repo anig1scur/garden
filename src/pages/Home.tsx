@@ -124,7 +124,7 @@ const Garden: React.FC = () => {
   const fetchGarden = async (id: string) => {
     console.log('fetching garden:', id);
     try {
-      const response = await axios.get<{ boxes: BoxItem[] }>(`https://wmmm.vercel.app/api/gardens/${ id }`);
+      const response = await axios.get<{ boxes: BoxItem[] }>(`https://api.piggy.lol/gardens/${ id }`);
       setBoxes(response.data.boxes);
       setGardenId(id);
     } catch (error) {
@@ -135,9 +135,9 @@ const Garden: React.FC = () => {
   const saveGarden = async () => {
     try {
       if (gardenId) {
-        await axios.put(`https://wmmm.vercel.app/api/gardens/${ gardenId }`, { boxes });
+        await axios.put(`https://api.piggy.lol/gardens/${ gardenId }`, { boxes });
       } else {
-        const response = await axios.post<{ id: string }>('https://wmmm.vercel.app/api/gardens', { boxes });
+        const response = await axios.post<{ id: string }>('https://api.piggy.lol/gardens', { boxes });
         setGardenId(response.data.id);
         navigate(`/${ response.data.id }`);
       }
