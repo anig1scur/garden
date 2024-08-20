@@ -35,17 +35,31 @@ const Rect: React.FC<BoxProps> = ({ text, bgColor, color, width = 100, height = 
   );
 }
 
-const Curve: React.FC<BoxProps> = ({ text, bgColor, color }) => {
+interface ContainerSize {
+  width: number;
+  height: number;
+}
 
-  const textRef = useRef(null);
+const Curve: React.FC<BoxProps> = ({
+  text,
+  bgColor,
+  color,
+  className,
+  height = 100,
+  width = 100,
+}) => {
+  const minFontSize = 12;
+  const maxFontSize = 48;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState<ContainerSize>({ width, height });
   const [svgInfo, setSvgInfo] = useState<SvgInfo>({
-    pathD: undefined,
-    width: 0,
-    height: 0,
-    viewBox: undefined
+    pathD: '',
+    width: width,
+    height: height,
+    viewBox: '0 0 100 100'
   });
 
-  const extractInfo = (svgString: string) => {
+  const extractInfo = (svgString: string): SvgInfo => {
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgString, 'image/svg+xml');
     const pathElement = svgDoc.querySelector('path');
@@ -56,46 +70,80 @@ const Curve: React.FC<BoxProps> = ({ text, bgColor, color }) => {
     return { pathD, width, height, viewBox };
   };
 
+  const calculateFontSize = (containerWidth: number, containerHeight: number, textLength: number): number => {
+    // 估算路径长度（这里使用容器对角线长度作为近似值）
+    const pathLength = Math.sqrt(containerWidth * containerWidth + containerHeight * containerHeight);
 
-  const calculateFontSizeByWidthAndTextLength = (width: number, textLength: number) => {
-    const averageLetterWidth = width / textLength;
-    return averageLetterWidth;
-  }
+    // 计算每个字符可用的空间
+    const spacePerChar = pathLength / textLength;
 
+    let fontSize = spacePerChar * (textLength / 6);
+
+    // 限制字体大小在指定范围内
+    fontSize = Math.max(minFontSize, Math.min(fontSize, maxFontSize));
+
+    return fontSize;
+  };
 
   useEffect(() => {
     const { pathD, width, height, viewBox } = extractInfo(ShapeSVG);
     setSvgInfo({ pathD, width, height, viewBox });
   }, []);
 
-  if (!svgInfo) {
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerSize({ width, height });
+      }
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  if (!svgInfo.pathD) {
     return <div>Loading...</div>;
   }
 
-
-  const { pathD, width, height, viewBox } = svgInfo;
-  const fontSize = calculateFontSizeByWidthAndTextLength(width, text.length);
-
+  const { pathD, viewBox } = svgInfo;
+  const fontSize = calculateFontSize(containerSize.width, containerSize.height, text.length);
+  const textTranslate = text.length < 6 ? 'translate-y-3' : 'translate-y-2'
   return (
-    <svg width={ width } height={ height } viewBox={ viewBox }>
-      <path
-        d={ pathD }
-        stroke={ bgColor }
-        strokeWidth={ 36 }
-        strokeLinecap="round"
-      />
-      <defs>
-        <path id="textPath" d={ pathD } />
-      </defs>
-      <text className='translate-y-3 text-zinc-400' >
-        <textPath href="#textPath" className="font-bold" fill={ color } style={ {
-          fontSize: `${ fontSize }px`,
-          letterSpacing: `${ fontSize * 0.2 }px`
-        } } ref={ textRef }>
-          { text }
-        </textPath>
-      </text>
-    </svg>
+    <div ref={ containerRef } style={ { width, height } }>
+      <svg width="100%" height="100%" viewBox={ viewBox } preserveAspectRatio="xMidYMid meet">
+        <path
+          d={ pathD }
+          stroke={ bgColor }
+          strokeWidth={ 36 }
+          strokeLinecap="round"
+          fill="none"
+        />
+        <defs>
+          <path id="textPath" d={ pathD } />
+        </defs>
+        <text className={ `${ textTranslate } text-zinc-400` }>
+          <textPath
+            href="#textPath"
+            className="font-bold"
+            fill={ color }
+            startOffset="50%"
+            textAnchor="middle"
+            style={ {
+              fontSize: `${ fontSize }px`,
+              letterSpacing: `${ fontSize * 0.05 }px`
+            } }
+          >
+            { text }
+          </textPath>
+        </text>
+      </svg>
+    </div>
   );
 };
 
@@ -169,8 +217,8 @@ const Garden: React.FC = () => {
     const x = centerX + radius * Math.cos(angle) - baseSize / 2;
     const y = centerY + radius * Math.sin(angle) - baseSize / 2;
     const size = baseSize * (1 - attempts * 0.001);
-    const text = data[index].key.en;
-    const desc = data[index].desc.en;
+    const text = data[index].key.cn;
+    const desc = data[index].desc.cn;
     const href = data[index].href || '';
     const bgColor = randomColor();
     const borderRadius = randomRadius();
@@ -309,7 +357,6 @@ const Garden: React.FC = () => {
                 />
                 <motion.div
                   className='absolute backdrop-blur-sm top-[100%] right-0 p-3 bg-white bg-opacity-50'
-
                   variants={ variants }
                 >
                   { box.desc }
