@@ -27,29 +27,29 @@ const Garden: React.FC = () => {
     const newId = await saveGarden(gardenId, boxes);
     if (newId && !gardenId) {
       setGardenId(newId);
-      navigate(`/${newId}`);
+      navigate(`/${ newId }`);
     }
   };
 
   return (
-    <div className='flex justify-center p-10'>
+    <div className='flex justify-center p-10 bg-noise'>
       <Sidebar
-        selectedBox={selectedBoxIndex !== null ? boxes[selectedBoxIndex] : null}
-        onBoxChange={(updatedBox) => {
+        selectedBox={ selectedBoxIndex !== null ? boxes[selectedBoxIndex] : null }
+        onBoxChange={ (updatedBox) => {
           if (selectedBoxIndex !== null) {
-            handleBoxChange(boxes, setBoxes, selectedBoxIndex, updatedBox);
+            handleBoxChange(setBoxes, selectedBoxIndex, updatedBox);
           }
-        }}
-        onNewBoxCreate={(newBox) => handleNewBoxCreate(boxes, setBoxes, newBox)}
+        } }
+        onNewBoxCreate={ (newBox) => handleNewBoxCreate(boxes, setBoxes, newBox) }
       />
-      <div className='bg-pink-500 text-white w-36 text-center rounded-sm h-fit p-1' onClick={handleSaveGarden}>
+      <div className='bg-pink-500 text-white w-36 text-center rounded-sm h-fit p-1' onClick={ handleSaveGarden }>
         Save Garden
       </div>
       <BoxContainer
-        boxes={boxes}
-        mode={mode}
-        onBoxChange={(index, newPosition) => handleBoxChange(setBoxes, index, newPosition)}
-        setSelectedBoxIndex={setSelectedBoxIndex}
+        boxes={ boxes }
+        mode={ mode }
+        onBoxChange={ (index, newPosition) => handleBoxChange(setBoxes, index, newPosition) }
+        setSelectedBoxIndex={ setSelectedBoxIndex }
       />
     </div>
   );

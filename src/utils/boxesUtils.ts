@@ -50,19 +50,22 @@ export const handleNewBoxCreate = (
   setBoxes: React.Dispatch<React.SetStateAction<BoxItem[]>>,
   newBox: Omit<BoxItem, 'x' | 'y' | 'width' | 'height'>
 ) => {
-  const newPosition = generateSpiralBox(boxes.length, data.length + 1, BASE_SIZE);
+  const newPosition = generateSpiralBox(boxes.length + 3, boxes.length + 1, BASE_SIZE);
   setBoxes(prevBoxes => [...prevBoxes, { ...newPosition, ...newBox }]);
 };
 
 const generateSpiralBox = (attempts: number, index: number, baseSize: number): BoxItem => {
   const angle = attempts * 0.5;
   const radius = baseSize * Math.sqrt(attempts);
-  const x = centerX + radius * Math.cos(angle) - baseSize / 2;
-  const y = centerY + radius * Math.sin(angle) - baseSize / 2;
+  const x = centerX + radius * Math.cos(angle) - baseSize / 3;
+  const y = centerY + radius * Math.sin(angle) - baseSize / 3;
   const size = baseSize * (1 - attempts * 0.001);
-  const text = data[index].key.en;
-  const desc = data[index].desc.en;
-  const href = data[index].href || '';
+
+  const box = data[index];
+
+  const text = box?.key.en;
+  const desc = box?.desc.en;
+  const href = box?.href || '';
   const bgColor = randomColor();
   const borderRadius = randomRadius();
   const color = 'black';

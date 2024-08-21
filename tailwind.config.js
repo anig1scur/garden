@@ -4,7 +4,11 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{css,ts,tsx}"],
   darkMode: ['media', "class", "[data-theme='dark']"],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'noise': "url('/assets/noise.gif')",
+      }
+    },
   },
   plugins: [],
 }

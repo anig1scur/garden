@@ -15,7 +15,7 @@ interface BoxContainerProps {
 const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, setSelectedBoxIndex }) => {
   const boxVariants: Variants = {
     hover: {
-      scale: 1.5,
+      scale: 1.25,
       transition: { duration: 0.2, staggerChildren: 0.1 },
       zIndex: 999,
     }
