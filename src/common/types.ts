@@ -22,6 +22,10 @@ export type PosProps = {
   height: number;
 }
 
+export type ContainerSize = {
+  width: number;
+  height: number;
+}
 
 export type BoxItem = PosProps & {
   text: string;
