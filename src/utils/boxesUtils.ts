@@ -3,8 +3,8 @@ import { data } from '@/common/mock';
 import { randomColor, randomRadius } from '@/utils/randomUtils';
 
 export const BASE_SIZE = 100;
-const containerWidth = screen.availWidth * 0.8;
-const containerHeight = screen.availHeight * 0.8;
+const containerWidth = screen.availWidth;
+const containerHeight = screen.availHeight;
 const centerX = containerWidth / 2;
 const centerY = containerHeight / 2;
 

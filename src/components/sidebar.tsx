@@ -5,6 +5,7 @@ import { useModeContext } from '@/common/context';
 type SidebarProps = {
   selectedBox: BoxItem | null;
   onBoxChange: (updatedBox: BoxItem) => void;
+  onSaveGarden: () => void;
   onNewBoxCreate: (newBox: Omit<BoxItem, 'x' | 'y' | 'width' | 'height'>) => void;
 };
 
@@ -15,7 +16,7 @@ const DEFAULT_POS = {
   height: 0,
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ selectedBox, onBoxChange, onNewBoxCreate }) => {
+const Sidebar: React.FC<SidebarProps> = ({ selectedBox, onBoxChange, onSaveGarden, onNewBoxCreate }) => {
 
   const [box, setBox] = React.useState<BoxItem | null>(selectedBox);
 
@@ -55,19 +56,23 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedBox, onBoxChange, onNewBoxCre
 
   return (
     <div className="w-64 text-white p-4 overflow-y-auto flex-grow flex-shrink-0">
-      <div className='flex mt-5 gap-10 items-center'>
+      <div className='flex mt-5 gap-10 flex-col items-start'>
         <div className='text-4xl font-bold'>Garden</div>
-        <button
-          onClick={ toggleMode }
-          className='p-2 py-1 bg-pink-500 text-white rounded-md'
-        >
-          { mode === 'edit' ? 'Editing' : 'Viewing' }
-        </button>
+        <div className='flex gap-5'>
+          <button
+            onClick={ toggleMode }
+            className='p-2 py-1 bg-pink-500 text-white rounded-md'
+          >
+            { mode === 'edit' ? 'Editing' : 'Viewing' }
+          </button>
+          <button
+            onClick={ onSaveGarden }
+            className='p-2 py-1 bg-pink-500 text-white rounded-md'
+          >Save</button>
+        </div>
       </div>
-      <h2 className="text-xl font-bold mb-4 mt-4">
-        { selectedBox ? 'Edit Box' : 'Create New Box' }
-      </h2>
-      <form onSubmit={ handleNewBoxCreate }>
+
+      { selectedBox && mode === 'edit' && <form className='mt-10' onSubmit={ handleNewBoxCreate }>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-300">Text</label>
           <input
@@ -119,15 +124,8 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedBox, onBoxChange, onNewBoxCre
             className="mt-1 block w-full text-black px-2 py-1 text-sm rounded-md border-gray-300 shadow-sm"
           />
         </div>
-        { !selectedBox && (
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white rounded-md py-2 px-4 hover:bg-blue-600"
-          >
-            Create New Box
-          </button>
-        ) }
       </form>
+      }
     </div>
   );
 };

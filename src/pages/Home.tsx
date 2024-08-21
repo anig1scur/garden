@@ -40,14 +40,13 @@ const Garden: React.FC = () => {
             handleBoxChange(setBoxes, selectedBoxIndex, updatedBox);
           }
         } }
+        onSaveGarden={ handleSaveGarden }
         onNewBoxCreate={ (newBox) => handleNewBoxCreate(boxes, setBoxes, newBox) }
       />
-      <div className='bg-pink-500 text-white w-36 text-center rounded-sm h-fit p-1' onClick={ handleSaveGarden }>
-        Save Garden
-      </div>
       <BoxContainer
         boxes={ boxes }
         mode={ mode }
+        onNewBoxCreate={ (newBox) => handleNewBoxCreate(boxes, setBoxes, newBox) }
         onBoxChange={ (index, newPosition) => handleBoxChange(setBoxes, index, newPosition) }
         setSelectedBoxIndex={ setSelectedBoxIndex }
       />

@@ -67,8 +67,8 @@ const Curve: React.FC<BoxProps> = ({
   }
 
   const { pathD, viewBox } = svgInfo;
-  const fontSize = calculateFontSize(90, 90, text.length);
-  const textTranslate = text.length < 6 ? 'translate-y-3' : 'translate-y-2';
+  const fontSize = calculateFontSize(90, 90, text?.length || 12);
+  const textTranslate = text?.length < 6 ? 'translate-y-3' : 'translate-y-2';
 
   return (
     <div ref={ containerRef } style={ { width, height } } className={ className }>
