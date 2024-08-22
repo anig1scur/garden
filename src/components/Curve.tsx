@@ -21,10 +21,9 @@ const calculateFontSize = (containerWidth: number, containerHeight: number, text
   const spacePerChar = pathLength / textLength;
 
   let fontSize = spacePerChar * 1.25;
-
-
   return fontSize;
 };
+
 const Curve: React.FC<BoxProps> = ({
   text,
   bgColor,
@@ -86,13 +85,14 @@ const Curve: React.FC<BoxProps> = ({
         <text className={ `${ textTranslate } text-zinc-400` }>
           <textPath
             href="#textPath"
-            className="font-bold"
+            className="font-bold text"
             fill={ color }
             startOffset="50%"
             textAnchor="middle"
             style={ {
               fontSize: `${ fontSize }px`,
-              letterSpacing: `${ fontSize * 0.05 }px`
+              letterSpacing: `${ fontSize * 0.05 }px`,
+
             } }
           >
             { text }

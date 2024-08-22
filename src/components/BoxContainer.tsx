@@ -5,16 +5,18 @@ import { BoxItem } from '@/common/types';
 import Rect from '@/components/Rect';
 import Curve from '@/components/Curve';
 import { randomColor } from '@/utils/randomUtils';
+import BoxEditor from '@/components/BoxEditor';
 
 interface BoxContainerProps {
   boxes: BoxItem[];
   mode: string;
   onBoxChange: (index: number, newPosition: Partial<BoxItem>) => void;
+  selectedBoxIdx: number | null;
   setSelectedBoxIndex: (index: number | null) => void;
   onNewBoxCreate: (newBox: BoxItem) => void;
 }
 
-const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, setSelectedBoxIndex, onNewBoxCreate }) => {
+const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -98,9 +100,10 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
     }
   };
 
+
   return (
     <div
-      className='relative w-full h-svh overflow-scroll select-none'
+      className='relative w-full max-h-screen h-screen overflow-auto select-none'
       onPointerDown={ handleMouseDown }
       onPointerMove={ handleMouseMove }
       onPointerUp={ handleMouseUp }
@@ -109,11 +112,12 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
     >
       { boxes.map((box, index) => {
         const BoxComponent = index % 2 === 0 ? Curve : Rect;
+        const selected = index === selectedBoxIdx;
         return mode === 'edit' ? (
           <Rnd
             key={ index }
             default={ { x: box.x, y: box.y, width: box.width, height: box.height } }
-            className='border-dashed border-[1px] border-white'
+            className={ `border-2 border-dashed border-white ${ selected && "z-10" }` }
             onDragStop={ (e, d) => onBoxChange(index, { x: d.x, y: d.y }) }
             onResize={ (e, direction, ref, delta, position) => {
               onBoxChange(index, {
@@ -123,12 +127,14 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
                 height: ref.offsetHeight,
               });
             } }
-            onClick={ (e: React.MouseEvent) => {
-              e.stopPropagation();
-              setSelectedBoxIndex(index);
-            } }
           >
-            <BoxComponent { ...box } />
+            <div
+              onClick={ (e) => e.stopPropagation() }
+              onDoubleClick={ () => setSelectedBoxIndex(index) }>
+              <BoxComponent
+                { ...box } />
+              <BoxEditor show={ selected } selectedBox={ box } onBoxChange={ (updatedBox) => onBoxChange(index, updatedBox) } />
+            </div>
           </Rnd>
         ) : (
           <motion.div

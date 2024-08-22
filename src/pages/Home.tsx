@@ -23,6 +23,20 @@ const Garden: React.FC = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    const handleDelete = (e: KeyboardEvent) => {
+      if (e.key === 'Backspace' && selectedBoxIndex !== null) {
+        setBoxes(prevBoxes => prevBoxes.filter((_, i) => i !== selectedBoxIndex));
+        setSelectedBoxIndex(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleDelete);
+    return () => {
+      window.removeEventListener('keydown', handleDelete);
+    };
+  }, [selectedBoxIndex]);
+
   const handleSaveGarden = async () => {
     const newId = await saveGarden(gardenId, boxes);
     if (newId && !gardenId) {
@@ -32,20 +46,18 @@ const Garden: React.FC = () => {
   };
 
   return (
-    <div className='flex justify-center p-10 bg-noise'>
+    <div className='max-h-screen overflow-auto justify-center' onClick={ () => {
+      setSelectedBoxIndex(-1)
+    }
+    }>
       <Sidebar
-        selectedBox={ selectedBoxIndex !== null ? boxes[selectedBoxIndex] : null }
-        onBoxChange={ (updatedBox) => {
-          if (selectedBoxIndex !== null) {
-            handleBoxChange(setBoxes, selectedBoxIndex, updatedBox);
-          }
-        } }
         onSaveGarden={ handleSaveGarden }
         onNewBoxCreate={ (newBox) => handleNewBoxCreate(boxes, setBoxes, newBox) }
       />
       <BoxContainer
         boxes={ boxes }
         mode={ mode }
+        selectedBoxIdx={ selectedBoxIndex }
         onNewBoxCreate={ (newBox) => handleNewBoxCreate(boxes, setBoxes, newBox) }
         onBoxChange={ (index, newPosition) => handleBoxChange(setBoxes, index, newPosition) }
         setSelectedBoxIndex={ setSelectedBoxIndex }
