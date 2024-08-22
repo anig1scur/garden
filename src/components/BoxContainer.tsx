@@ -35,22 +35,26 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (mode === 'edit' && e.target === containerRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX - containerRect.left,
-        y: e.clientY - containerRect.top
-      });
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        setIsDragging(true);
+        setDragStart({
+          x: e.clientX - rect.left + container.scrollLeft,
+          y: e.clientY - rect.top + container.scrollTop
+        });
+      }
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDragging && dragStart) {
-      const containerRect = containerRef.current?.getBoundingClientRect();
-      if (containerRect) {
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
         setCurrentPosition({
-          x: e.clientX - containerRect.left,
-          y: e.clientY - containerRect.top
+          x: e.clientX - rect.left + container.scrollLeft,
+          y: e.clientY - rect.top + container.scrollTop
         });
       }
     }
@@ -58,10 +62,11 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
 
   const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDragging && dragStart && mode === 'edit') {
-      const containerRect = containerRef.current?.getBoundingClientRect();
-      if (containerRect) {
-        const endX = e.clientX - containerRect.left;
-        const endY = e.clientY - containerRect.top;
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const endX = e.clientX - rect.left + container.scrollLeft;
+        const endY = e.clientY - rect.top + container.scrollTop;
 
         const width = Math.abs(endX - dragStart.x);
         const height = Math.abs(endY - dragStart.y);
@@ -95,7 +100,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
 
   return (
     <div
-      className='relative w-full h-svh overflow-scroll  select-none'
+      className='relative w-full h-svh overflow-scroll select-none'
       onPointerDown={ handleMouseDown }
       onPointerMove={ handleMouseMove }
       onPointerUp={ handleMouseUp }
