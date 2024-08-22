@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BoxItem } from '@/common/types';
 import { useModeContext } from '@/common/context';
-import Sidebar from '@/components/sidebar';
+import Sidebar from '@/components/Sidebar';
 import BoxContainer from '@/components/BoxContainer';
 import { initBoxes, handleBoxChange, handleNewBoxCreate } from '@/utils/boxesUtils';
 import { fetchGarden, saveGarden } from '@/utils/apiUtils';

@@ -26,7 +26,7 @@ export const initBoxes = (setBoxes: React.Dispatch<React.SetStateAction<BoxItem[
     if (attempts < maxAttempts) {
       newBoxes.push(newBox);
     } else {
-      console.log(`Couldn't place box ${ i } after ${ maxAttempts } attempts`);
+      console.error(`Couldn't place box ${ i } after ${ maxAttempts } attempts`);
     }
   }
 

@@ -22,31 +22,33 @@ const TextFit: React.FC<TextFitProps> = ({
 }) => {
   const [fontSize, setFontSize] = useState(maxFontSize);
   const textRef = useRef<HTMLDivElement>(null);
+  const fitText = () => {
+    if (textRef.current) {
+      const element = textRef.current;
+      let low = minFontSize;
+      let high = maxFontSize;
+
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        element.style.fontSize = `${ mid }px`;
+
+        if (Math.abs(element.scrollWidth - width) <= 2 && Math.abs(element.scrollHeight - height) <= 2) {
+          low = mid + 1;
+        } else {
+          high = mid - 1;
+        }
+      }
+      setFontSize(high);
+    }
+  };
 
   useEffect(() => {
-    const fitText = () => {
-      if (textRef.current) {
-        const element = textRef.current;
-        let low = minFontSize;
-        let high = maxFontSize;
-
-        while (low <= high) {
-          const mid = Math.floor((low + high) / 2);
-          element.style.fontSize = `${ mid }px`;
-
-          if (element.scrollWidth <= width && element.scrollHeight <= height) {
-            low = mid + 1;
-          } else {
-            high = mid - 1;
-          }
-        }
-
-        setFontSize(high);
-      }
-    };
-
     fitText();
   }, [children, width, height, minFontSize, maxFontSize]);
+
+  setTimeout(() => {
+    fitText();
+  }, 0);
 
   return (
     <motion.div
