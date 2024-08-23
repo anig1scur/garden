@@ -26,6 +26,7 @@ export const initBoxes = (setBoxes: React.Dispatch<React.SetStateAction<BoxItem[
     if (attempts < maxAttempts) {
       newBoxes.push(newBox);
     } else {
+      newBoxes.push(newBox)
       console.error(`Couldn't place box ${ i } after ${ maxAttempts } attempts`);
     }
   }
@@ -48,7 +49,7 @@ export const handleBoxChange = (
 export const handleNewBoxCreate = (
   boxes: BoxItem[],
   setBoxes: React.Dispatch<React.SetStateAction<BoxItem[]>>,
-  newBox: Omit<BoxItem, 'x' | 'y' | 'width' | 'height'>
+  newBox: Omit<BoxItem, 'x' | 'y' | 'width' | 'height' | 'type'>
 ) => {
   const newPosition = generateSpiralBox(boxes.length + 3, boxes.length + 1, BASE_SIZE);
   setBoxes(prevBoxes => [...prevBoxes, { ...newPosition, ...newBox }]);
@@ -57,8 +58,8 @@ export const handleNewBoxCreate = (
 const generateSpiralBox = (attempts: number, index: number, baseSize: number): BoxItem => {
   const angle = attempts * 0.5;
   const radius = baseSize * Math.sqrt(attempts);
-  const x = centerX + radius * Math.cos(angle) - baseSize / 3;
-  const y = centerY + radius * Math.sin(angle) - baseSize / 3;
+  const x = centerX + (radius * Math.cos(angle) - baseSize / 5) / 2;
+  const y = centerY + (radius * Math.sin(angle) - baseSize / 5) / 2;
   const size = baseSize * (1 - attempts * 0.001);
 
   const box = data[index];
@@ -69,12 +70,13 @@ const generateSpiralBox = (attempts: number, index: number, baseSize: number): B
   const bgColor = randomColor();
   const borderRadius = randomRadius();
   const color = 'black';
-
+  const type = index % 2 === 0 ? 'curve' : 'rect'
   return {
     x,
     y,
     width: size,
     height: size,
+    type,
     text,
     href,
     bgColor,
@@ -86,9 +88,9 @@ const generateSpiralBox = (attempts: number, index: number, baseSize: number): B
 
 const isOverlapping = (newPos: BoxItem, existingPositions: BoxItem[]): boolean => {
   return existingPositions.some(pos =>
-    newPos.x < pos.x + pos.width &&
+    newPos.x < (pos.x + pos.width) &&
     newPos.x + newPos.width > pos.x &&
-    newPos.y < pos.y + pos.height &&
+    newPos.y < (pos.y + pos.height) &&
     newPos.y + newPos.height > pos.y
   );
 };

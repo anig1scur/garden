@@ -28,6 +28,7 @@ export type ContainerSize = {
 }
 
 export type BoxItem = PosProps & {
+  type?: string;
   text: string;
   bgColor: string;
   color: string;

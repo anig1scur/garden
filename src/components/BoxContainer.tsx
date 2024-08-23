@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import { motion, Variants } from 'framer-motion';
 import { BoxItem } from '@/common/types';
@@ -6,8 +6,10 @@ import Rect from '@/components/Rect';
 import Curve from '@/components/Curve';
 import { randomColor } from '@/utils/randomUtils';
 import BoxEditor from '@/components/BoxEditor';
+import RadialMenu from './RadialMenu';
 
 interface BoxContainerProps {
+  containerRef: React.RefObject<HTMLDivElement>;
   boxes: BoxItem[];
   mode: string;
   onBoxChange: (index: number, newPosition: Partial<BoxItem>) => void;
@@ -16,11 +18,24 @@ interface BoxContainerProps {
   onNewBoxCreate: (newBox: BoxItem) => void;
 }
 
-const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
+const getBoxComponent = (type?: string) => {
+  switch (type) {
+    case 'curve':
+      return Curve;
+    case 'rect':
+      return Rect;
+    default:
+      return Rect;
+  }
+}
+
+const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, onBoxChange, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
+  const [showRadialMenu, setShowRadialMenu] = useState(false);
+  const [radialMenuPosition, setRadialMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [newComponentType, setNewComponentType] = useState<'curve' | 'rect' | undefined>(undefined);
 
   const boxVariants: Variants = {
     hover: {
@@ -34,6 +49,36 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
     rest: { display: "none", opacity: 0 },
     hover: { display: "block", opacity: 1 },
   };
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    if (mode === 'edit') {
+      setShowRadialMenu(true);
+      setRadialMenuPosition({ x: e.clientX, y: e.clientY });
+    }
+  }, [mode]);
+
+  const handleRadialMenuSelect = useCallback((type: 'curve' | 'rect') => {
+    setNewComponentType(type);
+    setShowRadialMenu(false);
+
+    const container = containerRef.current;
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      const newBox: BoxItem = {
+        type,
+        x: radialMenuPosition.x - rect.left + container.scrollLeft,
+        y: radialMenuPosition.y - rect.top + container.scrollTop,
+        width: 100,
+        height: 100,
+        text: '',
+        desc: '',
+        color: 'white',
+        bgColor: randomColor(),
+      };
+      onNewBoxCreate(newBox);
+    }
+  }, [radialMenuPosition, onNewBoxCreate]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (mode === 'edit' && e.target === containerRef.current) {
@@ -92,6 +137,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
           text: '',
           desc: '',
           color: 'white',
+          type: newComponentType,
           bgColor: randomColor()
         };
 
@@ -104,6 +150,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
   return (
     <div
       className='relative w-full max-h-screen h-screen overflow-auto select-none'
+      onContextMenu={ handleContextMenu }
       onPointerDown={ handleMouseDown }
       onPointerMove={ handleMouseMove }
       onPointerUp={ handleMouseUp }
@@ -111,7 +158,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
       style={ { cursor: isDragging ? 'crosshair' : 'default' } }
     >
       { boxes.map((box, index) => {
-        const BoxComponent = index % 2 === 0 ? Curve : Rect;
+        const BoxComponent = getBoxComponent(box.type)
         const selected = index === selectedBoxIdx;
         return mode === 'edit' ? (
           <Rnd
@@ -164,6 +211,13 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
             width: Math.abs(currentPosition.x - dragStart.x),
             height: Math.abs(currentPosition.y - dragStart.y),
           } }
+        />
+      ) }
+      { showRadialMenu && (
+        <RadialMenu
+          position={ radialMenuPosition }
+          onSelect={ handleRadialMenuSelect }
+          onClose={ () => setShowRadialMenu(false) }
         />
       ) }
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BoxItem } from '@/common/types';
 import { useModeContext } from '@/common/context';
@@ -9,6 +9,7 @@ import { fetchGarden, saveGarden } from '@/utils/apiUtils';
 
 const Garden: React.FC = () => {
   const [boxes, setBoxes] = useState<BoxItem[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [gardenId, setGardenId] = useState<string | null>(null);
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
   const { mode } = useModeContext();
@@ -25,7 +26,7 @@ const Garden: React.FC = () => {
 
   useEffect(() => {
     const handleDelete = (e: KeyboardEvent) => {
-      if (e.key === 'Backspace' && selectedBoxIndex !== null) {
+      if (e.key === 'Backspace' && selectedBoxIndex !== null && e.target === containerRef.current) {
         setBoxes(prevBoxes => prevBoxes.filter((_, i) => i !== selectedBoxIndex));
         setSelectedBoxIndex(null);
       }
@@ -57,6 +58,7 @@ const Garden: React.FC = () => {
       <BoxContainer
         boxes={ boxes }
         mode={ mode }
+        containerRef={ containerRef }
         selectedBoxIdx={ selectedBoxIndex }
         onNewBoxCreate={ (newBox) => handleNewBoxCreate(boxes, setBoxes, newBox) }
         onBoxChange={ (index, newPosition) => handleBoxChange(setBoxes, index, newPosition) }
