@@ -20,6 +20,7 @@ export type PosProps = {
   y: number;
   width: number;
   height: number;
+  rotate?: number;
 }
 
 export type ContainerSize = {

@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Rnd } from 'react-rnd';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { BoxItem } from '@/common/types';
 import Rect from '@/components/Rect';
 import Curve from '@/components/Curve';
@@ -16,24 +15,25 @@ interface BoxContainerProps {
   onNewBoxCreate: (newBox: BoxItem) => void;
 }
 
+const boxVariants: Variants = {
+  initial: { x: 0, y: 0 },
+  hover: {
+    scale: 1.25,
+    transition: { duration: 0.2, staggerChildren: 0.1 },
+    zIndex: 999,
+  }
+};
+
+const descVariants: Variants = {
+  initial: { display: "none" },
+  hover: { display: "block" },
+};
+
 const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
-
-  const boxVariants: Variants = {
-    hover: {
-      scale: 1.25,
-      transition: { duration: 0.2, staggerChildren: 0.1 },
-      zIndex: 999,
-    }
-  };
-
-  const descVariants: Variants = {
-    rest: { display: "none", opacity: 0 },
-    hover: { display: "block", opacity: 1 },
-  };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (mode === 'edit' && e.target === containerRef.current) {
@@ -100,10 +100,23 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
     }
   };
 
+  const handleDragEnd = (index: number) => (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const xDirection = info.offset.x > 0 ? 1 : -1;
+    const yDirection = info.offset.y > 0 ? 1 : -1;
+    const xVelocity = Math.min(Math.abs(info.velocity.x), 1);
+    const yVelocity = Math.min(Math.abs(info.velocity.y), 1);
+    // const rotation = Math.floor(velocity * 40 * direction);
+
+    onBoxChange(index, {
+      x: boxes[index].x + info.offset.x + xVelocity * 100 * xDirection,
+      y: boxes[index].y + info.offset.y + yVelocity * 100 * yDirection,
+      // rotate: boxes[index].rotate ? boxes[index].rotate + rotation : rotation
+    });
+  };
 
   return (
     <div
-      className='relative w-full max-h-screen h-screen overflow-auto select-none'
+      className='relative opacity-80 w-full max-h-screen h-screen overflow-auto select-none'
       onPointerDown={ handleMouseDown }
       onPointerMove={ handleMouseMove }
       onPointerUp={ handleMouseUp }
@@ -113,45 +126,76 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ boxes, mode, onBoxChange, s
       { boxes.map((box, index) => {
         const BoxComponent = index % 2 === 0 ? Curve : Rect;
         const selected = index === selectedBoxIdx;
+
         return mode === 'edit' ? (
-          <Rnd
+          <motion.div
             key={ index }
-            default={ { x: box.x, y: box.y, width: box.width, height: box.height } }
-            className={ `border-2 border-dashed border-white ${ selected && "z-10" }` }
-            onDragStop={ (e, d) => onBoxChange(index, { x: d.x, y: d.y }) }
-            onResize={ (e, direction, ref, delta, position) => {
-              onBoxChange(index, {
-                x: position.x,
-                y: position.y,
-                width: ref.offsetWidth,
-                height: ref.offsetHeight,
-              });
+            drag
+            dragElastic={ 0.1 }
+            dragMomentum={ true }
+            initial={
+              {
+                x: box.x,
+                y: box.y
+              }
+            }
+            animate={
+              {
+                x: box.x,
+                y: box.y
+              }
+            }
+            dragTransition={ { timeConstant: 200, power: 0.1 } }
+            onDragEnd={ handleDragEnd(index) }
+            style={ {
+              position: 'absolute',
+              width: box.width,
+              height: box.height,
             } }
+            transition={ {
+              type: "spring",
+              stiffness: 50,
+              damping: 30,
+              mass: 1,
+              restDelta: 0.001,
+            } }
+            className={ `border-2 border-dashed border-white ${ selected && "z-10" }` }
+            onClick={ (e) => e.stopPropagation() }
+            onDoubleClick={ () => setSelectedBoxIndex(index) }
           >
-            <div
-              onClick={ (e) => e.stopPropagation() }
-              onDoubleClick={ () => setSelectedBoxIndex(index) }>
-              <BoxComponent
-                { ...box } />
-              <BoxEditor show={ selected } selectedBox={ box } onBoxChange={ (updatedBox) => onBoxChange(index, updatedBox) } />
-            </div>
-          </Rnd>
+            <BoxComponent { ...box } />
+            <BoxEditor
+              show={ selected }
+              selectedBox={ box }
+              onBoxChange={ (updatedBox) => onBoxChange(index, updatedBox) }
+            />
+          </motion.div>
         ) : (
           <motion.div
             key={ index }
-            initial="rest"
+            initial={ "initial" }
+            animate={ { x: box.x, y: box.y } }
             whileHover="hover"
-            animate="rest"
             variants={ boxVariants }
-            style={ { position: 'absolute', left: box.x, top: box.y } }
+            style={ { position: 'absolute' } }
+            transition={ {
+              type: "spring",
+              stiffness: 50,
+              damping: 30,
+              mass: 1,
+              restDelta: 0.001,
+            } }
           >
             <BoxComponent { ...box } />
-            <motion.div
+            { box.desc && <motion.div
+              transition={ {
+                type: "just"
+              } }
               className='absolute backdrop-blur-sm top-[100%] right-0 p-3 bg-white bg-opacity-50'
               variants={ descVariants }
             >
               { box.desc }
-            </motion.div>
+            </motion.div> }
           </motion.div>
         );
       }) }
