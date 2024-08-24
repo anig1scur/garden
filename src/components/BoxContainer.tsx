@@ -1,12 +1,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import { motion, Variants } from 'framer-motion';
-import { BoxItem } from '@/common/types';
-import Rect from '@/components/Rect';
-import Curve from '@/components/Curve';
+import { BoxItem, BoxType } from '@/common/types';
+import { Rect, Curve, Ghost } from '@/components/box';
 import { randomColor } from '@/utils/randomUtils';
 import BoxEditor from '@/components/BoxEditor';
 import RadialMenu from './RadialMenu';
+import { BASE_SIZE } from "@/utils/boxesUtils"
 
 interface BoxContainerProps {
   containerRef: React.RefObject<HTMLDivElement>;
@@ -24,6 +24,8 @@ const getBoxComponent = (type?: string) => {
       return Curve;
     case 'rect':
       return Rect;
+    case 'ghost':
+      return Ghost;
     default:
       return Rect;
   }
@@ -35,7 +37,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
   const [showRadialMenu, setShowRadialMenu] = useState(false);
   const [radialMenuPosition, setRadialMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [newComponentType, setNewComponentType] = useState<'curve' | 'rect' | undefined>(undefined);
+  const [newComponentType, setNewComponentType] = useState<BoxType | undefined>(undefined);
 
   const boxVariants: Variants = {
     hover: {
@@ -58,7 +60,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
     }
   }, [mode]);
 
-  const handleRadialMenuSelect = useCallback((type: 'curve' | 'rect') => {
+  const handleRadialMenuSelect = useCallback((type: BoxType) => {
     setNewComponentType(type);
     setShowRadialMenu(false);
 
@@ -69,8 +71,8 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
         type,
         x: radialMenuPosition.x - rect.left + container.scrollLeft,
         y: radialMenuPosition.y - rect.top + container.scrollTop,
-        width: 100,
-        height: 100,
+        width: BASE_SIZE,
+        height: BASE_SIZE,
         text: '',
         desc: '',
         color: 'white',

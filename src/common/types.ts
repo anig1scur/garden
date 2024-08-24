@@ -6,8 +6,12 @@ export type SvgInfo = {
   viewBox: string | undefined;
 };
 
+export type BoxType = 'rect' | 'curve' | 'ghost';
+
+export const boxTypes: BoxType[] = ['rect', 'curve', 'ghost'];
+
 export type BoxProps = {
-  text: string;
+  text?: string;
   bgColor?: string;
   color?: string;
   width?: number;

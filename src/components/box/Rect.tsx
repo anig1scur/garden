@@ -1,6 +1,6 @@
 import React from 'react';
 import { BoxProps } from '@/common/types';
-import TextFit from '@/components/Textfit';
+import TextFit from './Textfit';
 
 const Rect: React.FC<BoxProps> = ({ text, bgColor, color, width = 100, height = 100, className }) => {
   return (
@@ -16,7 +16,7 @@ const Rect: React.FC<BoxProps> = ({ text, bgColor, color, width = 100, height = 
       width={ width }
       height={ height }
     >
-      { text }
+      { text || "" }
     </TextFit>
   );
 };

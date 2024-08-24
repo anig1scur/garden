@@ -29,8 +29,8 @@ const Curve: React.FC<BoxProps> = ({
   bgColor,
   color,
   className,
-  height = 100,
-  width = 100,
+  height = BASE_SIZE,
+  width = BASE_SIZE,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<ContainerSize>({ width, height });

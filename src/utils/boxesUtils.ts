@@ -71,6 +71,7 @@ const generateSpiralBox = (attempts: number, index: number, baseSize: number): B
   const borderRadius = randomRadius();
   const color = 'black';
   const type = index % 2 === 0 ? 'curve' : 'rect'
+
   return {
     x,
     y,

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, PropsWithChildren } from 'react';
 import { motion } from 'framer-motion';
 
 interface TextFitProps {
@@ -11,7 +11,7 @@ interface TextFitProps {
   style?: React.CSSProperties;
 }
 
-const TextFit: React.FC<TextFitProps> = ({
+const TextFit: React.FC<PropsWithChildren<TextFitProps>> = ({
   children,
   width,
   height,
