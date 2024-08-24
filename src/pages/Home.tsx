@@ -26,7 +26,7 @@ const Garden: React.FC = () => {
 
   useEffect(() => {
     const handleDelete = (e: KeyboardEvent) => {
-      if (e.key === 'Backspace' && selectedBoxIndex !== null && e.target === containerRef.current) {
+      if (e.key === 'Backspace' && selectedBoxIndex !== null && [containerRef.current, document.body].includes(e.target as HTMLElement)) {
         setBoxes(prevBoxes => prevBoxes.filter((_, i) => i !== selectedBoxIndex));
         setSelectedBoxIndex(null);
       }
