@@ -6,7 +6,7 @@ export type SvgInfo = {
   viewBox: string | undefined;
 };
 
-export type BoxType = 'rect' | 'curve' | 'ghost';
+export type BoxType = 'rect' | 'curve' | 'ghost' | 'smile';
 
 export const boxTypes: BoxType[] = ['rect', 'curve', 'ghost'];
 
@@ -35,5 +35,5 @@ export type ContainerSize = {
 }
 
 export type BoxItem = PosProps & BoxProps & {
-  type: BoxType;
+  type?: BoxType;
 }

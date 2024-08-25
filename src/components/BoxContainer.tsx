@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import { motion, Variants } from 'framer-motion';
 import { BoxItem, BoxType } from '@/common/types';
-import { Rect, Curve, Ghost } from '@/components/box';
+import { Rect, Curve, Ghost, Smile } from '@/components/box';
 import { randomColor } from '@/utils/randomUtils';
 import BoxEditor from '@/components/BoxEditor';
 import RadialMenu from './RadialMenu';
@@ -27,6 +27,8 @@ const getBoxComponent = (type?: string) => {
       return Rect;
     case 'ghost':
       return Ghost;
+    case 'smile':
+      return Smile;
     default:
       return Rect;
   }
@@ -194,12 +196,23 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
                 variants={ hoverDisplayVariants }
               >
                 <div className="absolute top-0 right-0 flex space-x-1 m-1">
-                  <div
-                    className="bg-white bg-opacity-30 text-white px-2 py-1 rounded text-sm cursor-pointer"
-                    onClick={ () => setSelectedBoxIndex(index) }
-                  >
-                    ✏️
-                  </div>
+                  {
+                    index !== selectedBoxIdx && <div
+                      className="bg-white bg-opacity-30 text-white px-2 py-1 rounded text-sm cursor-pointer"
+                      onClick={ () => setSelectedBoxIndex(index) }
+                    >
+                      ✏️
+                    </div>
+                  }
+                  {
+                    selectedBoxIdx === index &&
+                    <div
+                      className="bg-white bg-opacity-30 text-white px-2 py-1 rounded text-sm cursor-pointer"
+                      onClick={ () => setSelectedBoxIndex(null) }
+                    >
+                      👋
+                    </div>
+                  }
                   <div
                     className="bg-white bg-opacity-30 text-white px-2 py-1 rounded text-sm cursor-not-allowed"
                     onClick={ () => onDeleteBox(index) }

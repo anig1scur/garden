@@ -30,15 +30,31 @@ const Garden: React.FC = () => {
   };
 
   useEffect(() => {
-    const handleDelete = (e: KeyboardEvent) => {
+    const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === 'Backspace' && selectedBoxIndex !== null && [containerRef.current, document.body].includes(e.target as HTMLElement)) {
         deleteBox(selectedBoxIndex);
       }
+
+      else if ((e.key === 'ArrowUp' || e.key === '[') && selectedBoxIndex !== null) {
+
+        const box = boxes[selectedBoxIndex];
+        const newBoxes = boxes.filter((_, i) => i !== selectedBoxIndex);
+        setBoxes([...newBoxes, box]);
+
+      }
+
+      else if ((e.key === 'ArrowDown' || e.key === ']') && selectedBoxIndex !== null) {
+
+        const box = boxes[selectedBoxIndex];
+        const newBoxes = boxes.filter((_, i) => i !== selectedBoxIndex);
+        setBoxes([box, ...newBoxes]);
+      }
+
     };
 
-    window.addEventListener('keydown', handleDelete);
+    window.addEventListener('keydown', handleKeydown);
     return () => {
-      window.removeEventListener('keydown', handleDelete);
+      window.removeEventListener('keydown', handleKeydown);
     };
   }, [selectedBoxIndex]);
 

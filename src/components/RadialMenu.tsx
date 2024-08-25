@@ -12,6 +12,7 @@ const ITEMS: MenuItem[] = [
   { id: 'rect', label: 'Rect' },
   { id: 'curve', label: 'Curve' },
   { id: 'ghost', label: 'Ghost' },
+  { id: 'smile', label: 'Smile' },
 ];
 
 interface RadialMenuProps {

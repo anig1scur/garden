@@ -95,3 +95,4 @@ const isOverlapping = (newPos: BoxItem, existingPositions: BoxItem[]): boolean =
     newPos.y + newPos.height > pos.y
   );
 };
+
