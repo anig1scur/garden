@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import { motion, Variants } from 'framer-motion';
 import { BoxItem, BoxType } from '@/common/types';
@@ -13,6 +13,7 @@ interface BoxContainerProps {
   boxes: BoxItem[];
   mode: string;
   onBoxChange: (index: number, newPosition: Partial<BoxItem>) => void;
+  onDeleteBox: (index: number) => void;
   selectedBoxIdx: number | null;
   setSelectedBoxIndex: (index: number | null) => void;
   onNewBoxCreate: (newBox: BoxItem) => void;
@@ -31,7 +32,7 @@ const getBoxComponent = (type?: string) => {
   }
 }
 
-const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, onBoxChange, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
+const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, onBoxChange, onDeleteBox, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
@@ -47,7 +48,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
     }
   };
 
-  const descVariants: Variants = {
+  const hoverDisplayVariants: Variants = {
     rest: { display: "none", opacity: 0 },
     hover: { display: "block", opacity: 1 },
   };
@@ -166,7 +167,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
           <Rnd
             key={ index }
             default={ { x: box.x, y: box.y, width: box.width, height: box.height } }
-            className={ `border-2 border-dashed border-white ${ selected && "z-10" }` }
+            className={ `hover:outline-2 hover:outline-dashed outline-white ${ selected && "z-10" }` }
             onDragStop={ (e, d) => onBoxChange(index, { x: d.x, y: d.y }) }
             onResize={ (e, direction, ref, delta, position) => {
               onBoxChange(index, {
@@ -177,13 +178,39 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
               });
             } }
           >
-            <div
+            <motion.div
+              initial="rest"
+              whileHover="hover"
+              animate="rest"
               onClick={ (e) => e.stopPropagation() }
-              onDoubleClick={ () => setSelectedBoxIndex(index) }>
+              onContextMenu={ (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setSelectedBoxIndex(index)
+              } }>
+              <motion.div
+                variants={ hoverDisplayVariants }
+              >
+                <div className="absolute top-0 right-0 flex space-x-1 m-1">
+                  <div
+                    className="bg-white bg-opacity-30 text-white px-2 py-1 rounded text-sm cursor-pointer"
+                    onClick={ () => setSelectedBoxIndex(index) }
+                  >
+                    ✏️
+                  </div>
+                  <div
+                    className="bg-white bg-opacity-30 text-white px-2 py-1 rounded text-sm cursor-not-allowed"
+                    onClick={ () => onDeleteBox(index) }
+                  >
+                    ❌
+                  </div>
+                </div>
+              </motion.div>
+
               <BoxComponent
                 { ...box } />
               <BoxEditor show={ selected } selectedBox={ box } onBoxChange={ (updatedBox) => onBoxChange(index, updatedBox) } />
-            </div>
+            </motion.div>
           </Rnd>
         ) : (
           <motion.div
@@ -197,7 +224,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
             <BoxComponent { ...box } />
             <motion.div
               className='absolute backdrop-blur-sm top-[100%] right-0 p-3 bg-white bg-opacity-50'
-              variants={ descVariants }
+              variants={ hoverDisplayVariants }
             >
               { box.desc }
             </motion.div>

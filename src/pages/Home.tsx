@@ -24,11 +24,15 @@ const Garden: React.FC = () => {
     }
   }, [id]);
 
+  const deleteBox = (index: number) => {
+    setBoxes(prevBoxes => prevBoxes.filter((_, i) => i !== index));
+    setSelectedBoxIndex(null);
+  };
+
   useEffect(() => {
     const handleDelete = (e: KeyboardEvent) => {
       if (e.key === 'Backspace' && selectedBoxIndex !== null && [containerRef.current, document.body].includes(e.target as HTMLElement)) {
-        setBoxes(prevBoxes => prevBoxes.filter((_, i) => i !== selectedBoxIndex));
-        setSelectedBoxIndex(null);
+        deleteBox(selectedBoxIndex);
       }
     };
 
@@ -60,6 +64,7 @@ const Garden: React.FC = () => {
         mode={ mode }
         containerRef={ containerRef }
         selectedBoxIdx={ selectedBoxIndex }
+        onDeleteBox={ deleteBox }
         onNewBoxCreate={ (newBox) => handleNewBoxCreate(boxes, setBoxes, newBox) }
         onBoxChange={ (index, newPosition) => handleBoxChange(setBoxes, index, newPosition) }
         setSelectedBoxIndex={ setSelectedBoxIndex }
