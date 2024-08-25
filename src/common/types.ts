@@ -17,6 +17,9 @@ export type BoxProps = {
   width?: number;
   height?: number;
   className?: string;
+  desc?: string;
+  href?: string;
+  direction?: 'left' | 'right' | 'top';
 };
 
 export type PosProps = {
@@ -31,12 +34,6 @@ export type ContainerSize = {
   height: number;
 }
 
-export type BoxItem = PosProps & {
-  type?: string;
-  text: string;
-  bgColor: string;
-  color: string;
-  href?: string;
-  desc?: string;
-  className?: string;
-};
+export type BoxItem = PosProps & BoxProps & {
+  type: BoxType;
+}

@@ -78,7 +78,9 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
         desc: '',
         color: 'white',
         bgColor: randomColor(),
+        [type === 'ghost' ? 'direction' : '']: 'left',
       };
+
       onNewBoxCreate(newBox);
     }
   }, [radialMenuPosition, onNewBoxCreate]);

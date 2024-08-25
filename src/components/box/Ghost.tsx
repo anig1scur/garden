@@ -29,6 +29,7 @@ const Eyes: FC<EyesProps> = ({ direction }) => {
 const Ghost: FC<BoxProps> = ({
   bgColor,
   className,
+  direction = 'left',
   height = BASE_SIZE,
   width = BASE_SIZE,
 }) => {
@@ -38,10 +39,10 @@ const Ghost: FC<BoxProps> = ({
     <div ref={ containerRef } style={ { width, height } } className={ className }>
       <svg width="100%" height="100%" viewBox={ "0 0 219 163" } preserveAspectRatio="xMidYMid meet">
         <g className='bound'>
-          <path d="M32 127.112C12.2934 129.484 6.5 128.612 0 113.112C12.5 96.1123 31.5 110.112 34.5 59.1125C37.144 14.1652 75.8138 -5.40883 127.5 1.27927C162.5 8.1123 177 26.6123 180.5 51.1123C185.5 103.112 205 103.612 219 106.112C219 127.612 204.5 129.779 185 125.521C184.366 175.834 171.158 171.617 134 129.779C123.744 154.279 117.825 163.793 106.5 161.779C100.986 160.799 87.5 140.446 81.5 129.779C47.7491 172.473 32 173.112 32 127.112Z" fill={bgColor} />
+          <path d="M32 127.112C12.2934 129.484 6.5 128.612 0 113.112C12.5 96.1123 31.5 110.112 34.5 59.1125C37.144 14.1652 75.8138 -5.40883 127.5 1.27927C162.5 8.1123 177 26.6123 180.5 51.1123C185.5 103.112 205 103.612 219 106.112C219 127.612 204.5 129.779 185 125.521C184.366 175.834 171.158 171.617 134 129.779C123.744 154.279 117.825 163.793 106.5 161.779C100.986 160.799 87.5 140.446 81.5 129.779C47.7491 172.473 32 173.112 32 127.112Z" fill={ bgColor } />
         </g>
         <foreignObject className='h-full translate-y-[5%]  w-full'>
-          <Eyes direction='right' />
+          <Eyes direction={ direction } />
         </foreignObject>
       </svg>
     </div>
