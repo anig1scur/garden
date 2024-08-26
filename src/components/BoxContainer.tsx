@@ -34,13 +34,15 @@ const getBoxComponent = (type?: string) => {
   }
 }
 
+const SQUARE_TYPES = ['smile'];
+
 const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, onBoxChange, onDeleteBox, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
   const [showRadialMenu, setShowRadialMenu] = useState(false);
   const [radialMenuPosition, setRadialMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [newComponentType, setNewComponentType] = useState<BoxType | undefined>(undefined);
+  const [newComponentType, setNewComponentType] = useState<BoxType>('rect');
 
   const boxVariants: Variants = {
     hover: {
@@ -81,6 +83,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
         color: 'white',
         bgColor: randomColor(),
         [type === 'ghost' ? 'direction' : '']: 'left',
+        [type === 'smile' ? 'pos' : '']: 'lt'
       };
 
       onNewBoxCreate(newBox);
@@ -122,8 +125,11 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
         const endX = e.clientX - rect.left + container.scrollLeft;
         const endY = e.clientY - rect.top + container.scrollTop;
 
-        const width = Math.abs(endX - dragStart.x);
-        const height = Math.abs(endY - dragStart.y);
+        let width = Math.abs(endX - dragStart.x);
+        let height = Math.abs(endY - dragStart.y);
+        if (SQUARE_TYPES.includes(newComponentType)) {
+          width = height = Math.min(width, height);
+        }
 
         setIsDragging(false);
         setDragStart(null);
@@ -135,6 +141,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
 
         const x = Math.min(endX, dragStart.x);
         const y = Math.min(endY, dragStart.y);
+
 
         const newBox: BoxItem = {
           x,
@@ -174,11 +181,17 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
             className={ `hover:outline-2 hover:outline-dashed outline-white ${ selected && "z-10" }` }
             onDragStop={ (e, d) => onBoxChange(index, { x: d.x, y: d.y }) }
             onResize={ (e, direction, ref, delta, position) => {
+              let width = ref.offsetWidth;
+              let height = ref.offsetHeight;
+              if (SQUARE_TYPES.includes(box.type || '')) {
+                const size = Math.min(ref.offsetWidth, ref.offsetHeight);
+                width = height = size;
+              }
               onBoxChange(index, {
                 x: position.x,
                 y: position.y,
-                width: ref.offsetWidth,
-                height: ref.offsetHeight,
+                width,
+                height
               });
             } }
           >
@@ -221,7 +234,6 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
                   </div>
                 </div>
               </motion.div>
-
               <BoxComponent
                 { ...box } />
               <BoxEditor show={ selected } selectedBox={ box } onBoxChange={ (updatedBox) => onBoxChange(index, updatedBox) } />

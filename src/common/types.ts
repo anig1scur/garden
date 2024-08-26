@@ -20,6 +20,7 @@ export type BoxProps = {
   desc?: string;
   href?: string;
   direction?: 'left' | 'right' | 'top';
+  pos?: 'lt' | 'rt' | 'lb' | 'rb';
 };
 
 export type PosProps = {

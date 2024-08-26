@@ -10,7 +10,8 @@ const DEFAULT_POS = {
 
 const COMMON_ITEMS = ['bgColor', 'href', 'desc'] as const;
 const TEXT_ITEMS = ['text', 'color'] as const;
-const GHOST_ITEMS = ['direction'] as const;
+const DIRECTION_ITEMS = ['direction'] as const;
+const POS_ITEMS = ['pos'] as const;
 
 type BoxEditorProps = {
   show: boolean;
@@ -46,6 +47,30 @@ export const BoxEditor: React.FC<BoxEditorProps> = ({ show, selectedBox, onBoxCh
     const isColor = key === 'bgColor' || key === 'color';
     const isTextArea = key === 'desc';
     const isDirection = key === 'direction';
+    const isPos = key === 'pos';
+
+    if(isPos) {
+      return (
+        <div key={ key } className="mb-4">
+          <label className="block text-sm font-medium mb-2">Position</label>
+          <div className="flex space-x-4">
+            { ['lt', 'rt', 'lb', 'rb'].map((pos) => (
+              <label key={ pos } className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="pos"
+                  value={ pos }
+                  checked={ value ? value === pos : pos === 'lt' }
+                  onChange={ (e) => handleInputChange('pos', e.target.value) }
+                  className="form-radio h-4 w-4 text-blue-600"
+                />
+                <span className="ml-2 text-sm">{ pos }</span>
+              </label>
+            )) }
+          </div>
+        </div>
+      );
+    }
 
     if (isDirection) {
       return (
@@ -95,14 +120,24 @@ export const BoxEditor: React.FC<BoxEditorProps> = ({ show, selectedBox, onBoxCh
 
   if (!show || !box) return null;
 
-  const itemsToRender = [
-    ...(box.type === 'ghost' ? GHOST_ITEMS : TEXT_ITEMS),
-    ...COMMON_ITEMS,
-  ];
+  const itemsToRender = () => {
+    switch (box.type) {
+      case 'rect':
+      case 'curve':
+        return [...TEXT_ITEMS, ...COMMON_ITEMS];
+      case 'smile':
+        return [...POS_ITEMS, ...COMMON_ITEMS];
+      case 'ghost':
+        return [...DIRECTION_ITEMS, ...COMMON_ITEMS];
+      default:
+        return [];
+    };
+
+  }
 
   return (
     <form className='bg-slate-100 bg-opacity-50 p-3 absolute w-64 ml-2 left-full top-0'>
-      { itemsToRender.map(renderFormItem) }
+      { itemsToRender().map(renderFormItem) }
     </form>
   );
 }
