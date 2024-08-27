@@ -21,7 +21,11 @@ export type BoxProps = {
   href?: string;
   direction?: 'left' | 'right' | 'top';
   pos?: 'lt' | 'rt' | 'lb' | 'rb';
+  curveType?: string;
+  strokeWidth?: number;
 };
+
+
 
 export type PosProps = {
   x: number;

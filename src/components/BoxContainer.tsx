@@ -142,7 +142,6 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
         const x = Math.min(endX, dragStart.x);
         const y = Math.min(endY, dragStart.y);
 
-
         const newBox: BoxItem = {
           x,
           y,

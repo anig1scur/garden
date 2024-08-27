@@ -1,7 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { BoxProps, SvgInfo, ContainerSize } from '@/common/types';
-import ShapeSVG from '@assets/shape1.svg?raw';
 import { BASE_SIZE } from "@/utils/boxesUtils"
+
+interface CurveProps extends BoxProps {
+  curveType?: string;
+  strokeWidth?: number;
+}
 
 const extractInfo = (svgString: string): SvgInfo => {
   const parser = new DOMParser();
@@ -15,22 +19,20 @@ const extractInfo = (svgString: string): SvgInfo => {
 };
 
 const calculateFontSize = (containerWidth: number, containerHeight: number, textLength: number): number => {
-  // 估算路径长度（这里使用容器对角线长度作为近似值）
   const pathLength = Math.sqrt(containerWidth * containerWidth + containerHeight * containerHeight);
-  // 计算每个字符可用的空间
   const spacePerChar = pathLength / textLength;
-
-  let fontSize = spacePerChar * 1.25;
-  return fontSize;
+  return spacePerChar * 0.8;
 };
 
-const Curve: React.FC<BoxProps> = ({
+const Curve: React.FC<CurveProps> = ({
   text,
   bgColor,
   color,
   className,
   height = BASE_SIZE,
   width = BASE_SIZE,
+  curveType = 'curve_1',
+  strokeWidth = 36,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<ContainerSize>({ width, height });
@@ -40,10 +42,23 @@ const Curve: React.FC<BoxProps> = ({
     height: height,
     viewBox: `0 0 ${ width } ${ height }`,
   });
+  const [pathId, setPathId] = useState(`path-${ Date.now() }`);
 
   useEffect(() => {
-    const { pathD, width, height, viewBox } = extractInfo(ShapeSVG);
-    setSvgInfo({ pathD, width, height, viewBox });
+    const loadSVG = async () => {
+      try {
+        const svgModule = await import(`@assets/${ curveType }.svg?raw`);
+        const svgContent = svgModule.default;
+        const { pathD, width, height, viewBox } = extractInfo(svgContent);
+        setSvgInfo({ pathD, width, height, viewBox });
+        // Generate a new unique ID for the path
+        setPathId(`path-${ Date.now() }-${ Math.random().toString(36).substr(2, 9) }`);
+      } catch (error) {
+        console.error(`Failed to load SVG: ${ curveType }.svg`, error);
+      }
+    };
+
+    loadSVG();
 
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
@@ -59,15 +74,15 @@ const Curve: React.FC<BoxProps> = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [curveType]);
 
   if (!svgInfo.pathD) {
     return <div>Loading...</div>;
   }
 
-  const { pathD, viewBox } = svgInfo;
-  const fontSize = calculateFontSize(90, 90, text?.length || 12);
-  const textTranslate = text?.length < 6 ? 'translate-y-3' : 'translate-y-2';
+  const { pathD, viewBox, width: svgWidth, height: svgHeight } = svgInfo;
+  const fontSize = calculateFontSize(svgWidth, svgHeight, text?.length || 12);
+  const textOffset = Math.min(svgWidth, svgHeight) * 0.1;
 
   return (
     <div ref={ containerRef } style={ { width, height } } className={ className }>
@@ -75,16 +90,16 @@ const Curve: React.FC<BoxProps> = ({
         <path
           d={ pathD }
           stroke={ bgColor }
-          strokeWidth={ 36 }
+          strokeWidth={ strokeWidth }
           strokeLinecap="round"
           fill="none"
         />
         <defs>
-          <path id="textPath" d={ pathD } />
+          <path id={ pathId } d={ pathD } />
         </defs>
-        <text className={ `${ textTranslate } text-zinc-400` }>
+        <text className="text-zinc-400" dy={ textOffset }>
           <textPath
-            href="#textPath"
+            href={ `#${ pathId }` }
             className="font-bold text"
             fill={ color }
             startOffset="50%"
@@ -92,7 +107,6 @@ const Curve: React.FC<BoxProps> = ({
             style={ {
               fontSize: `${ fontSize }px`,
               letterSpacing: `${ fontSize * 0.05 }px`,
-
             } }
           >
             { text }
@@ -104,4 +118,3 @@ const Curve: React.FC<BoxProps> = ({
 };
 
 export default Curve;
-

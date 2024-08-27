@@ -34,7 +34,7 @@ const DEFAULT_POS = { x: 0, y: 0, width: 0, height: 0 };
 
 const FORM_CONFIGS = {
   rect: ['text', 'color', 'bgColor', 'href', 'desc'],
-  curve: ['text', 'color', 'bgColor', 'href', 'desc'],
+  curve: ['curveType', 'strokeWidth', 'text', 'color', 'bgColor', 'href', 'desc'],
   smile: ['pos', 'bgColor', 'href', 'desc'],
   ghost: ['direction', 'bgColor', 'href', 'desc'],
 };
@@ -117,6 +117,22 @@ export const BoxEditor: React.FC<BoxEditorProps> = ({ show, selectedBox, onBoxCh
           )) }
         </div>
       ),
+      curveType: (
+        ['curve_1', 'curve_2'].map((curveType) => (
+          <label key={ curveType } className="inline-flex items-center">
+            <input
+              type="radio"
+              name="curveType"
+              value={ curveType }
+              checked={ value ? value === curveType : curveType === 'curve_1' }
+              onChange={ (e) => handleInputChange('curveType', e.target.value) }
+              className="form-radio h-4 w-4 text-blue-600"
+            />
+            <span className="ml-2 text-sm">{ curveType }</span>
+          </label>
+        ))
+      ),
+      strokeWidth: <input type="range" { ...commonProps } />,
       default: <input type="text" { ...commonProps } />
     };
 
@@ -131,7 +147,7 @@ export const BoxEditor: React.FC<BoxEditorProps> = ({ show, selectedBox, onBoxCh
   if (!show || !box) return null;
 
   return (
-    <form className='bg-slate-100 bg-opacity-50 p-3 absolute w-56 ml-2 left-full top-0'>
+    <form className='bg-slate-100 bg-opacity-50 p-3 absolute w-56 ml-2 left-full top-0' onDrag={ (e) => e.stopPropagation() } onClick={ (e) => e.stopPropagation() }>
       { FORM_CONFIGS[box.type as keyof typeof FORM_CONFIGS].map(renderFormItem) }
     </form>
   );
