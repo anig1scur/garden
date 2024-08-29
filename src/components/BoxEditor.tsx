@@ -49,7 +49,7 @@ export const BoxEditor: React.FC<BoxEditorProps> = ({ show, selectedBox, onBoxCh
   const [box, setBox] = useState<BoxItem | null>(selectedBox);
 
   useEffect(() => {
-    setBox(selectedBox);
+  setBox(selectedBox);
   }, [selectedBox]);
 
   const handleInputChange = (key: keyof BoxItem, value: string) => {

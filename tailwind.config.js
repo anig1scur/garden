@@ -8,6 +8,7 @@ module.exports = {
       backgroundImage: {
         'logo': "url('/assets/logo.svg')",
         'noise': "url('/assets/noise.gif')",
+        'mirror': "url('/assets/bg.png')",
       }
     },
   },

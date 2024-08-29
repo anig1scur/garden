@@ -67,7 +67,7 @@ const Garden: React.FC = () => {
   };
 
   return (
-    <div className='max-h-screen cursor-ins overflow-auto justify-center' onClick={ () => {
+    <div className='max-h-screen cursor-ins overflow-visible justify-center' onClick={ () => {
       setSelectedBoxIndex(-1)
     }
     }>
