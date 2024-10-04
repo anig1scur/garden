@@ -10,8 +10,7 @@ export function cors(req: VercelRequest, res: VercelResponse) {
   // 允许的头
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept');
 
-  // 允许凭证（如果需要）
-  // res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // 处理 OPTIONS 请求
   if (req.method === 'OPTIONS') {
