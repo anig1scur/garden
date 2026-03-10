@@ -32,7 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onSaveGarden, onNewBoxCreate }) => {
       <div className='flex mt-5 gap-10 flex-col items-start'>
         <div className='flex gap-3 items-center'>
           <div className='bg-logo w-8 h-8 bg-contain' />
-          <div className='text-4xl font-bold'>Garden</div>
+          <div className='text-4xl font-bold text-pink-500'>Garden</div>
         </div>
         <div className='flex gap-5'>
           <button

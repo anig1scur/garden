@@ -7,6 +7,7 @@ import { randomColor } from '@/utils/randomUtils';
 import BoxEditor from '@/components/BoxEditor';
 import RadialMenu from './RadialMenu';
 import { BASE_SIZE } from "@/utils/boxesUtils"
+import { SHAPE_CONFIGS } from '@/common/shapeConfigs';
 
 interface BoxContainerProps {
   containerRef: React.RefObject<HTMLDivElement>;
@@ -162,29 +163,33 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
   };
 
 
+  // Dynamically resolve the right shape architecture based on mode. Default to mirror if not found.
+  const currentShape = SHAPE_CONFIGS[mode] || SHAPE_CONFIGS['mirror'];
+  const FrameComponent = currentShape.FrameComponent;
+  const clipPathId = `clipPath-${ currentShape.id }`;
+
   return (
     <div className="mt-5 relative mx-auto flex justify-center items-center max-w-[90svw] h-[90svh]">
-      <img src="./assets/bg.png" className='absolute object-contain h-full' />
-      <div
-        className="relative h-[86%] items-center justify-center scrollbar-hide select-none  overflow-auto"
-        style={ { clipPath: 'url(#phoneShape)' } }
-        onContextMenu={ handleContextMenu }
-        onPointerDown={ handleMouseDown }
-        onPointerMove={ handleMouseMove }
-        onPointerUp={ handleMouseUp }
-        ref={ containerRef }
-      >
-        <svg width="100%" height="100%" viewBox="0 0 338 642" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <clipPath id="phoneShape" 
-            clipPathUnits={"objectBoundingBox"} 
-            >
-              <path
-                d="M0.064,0.984 C0.021,0.745,-0.042,0.731,0.064,0.032 C0.407,-0.007,0.595,-0.006,0.926,0.032 C1,0.436,1,0.644,0.926,0.984 C0.584,1,0.394,1,0.064,0.984"
-                stroke="white" stroke-width="3" />
-            </clipPath>
-          </defs>
-        </svg>
+      <div className="relative h-full flex justify-center items-center" style={ { aspectRatio: currentShape.aspectRatioString } }>
+        {/* Overlay full dynamic shape image via SVGR so its border and details render over the clipped box bounds perfectly without getting clipped, AND inheriting the CSS color through currentColor */ }
+        <FrameComponent className="absolute inset-0 w-full h-full pointer-events-none z-10 text-yellow-800" />
+
+        <div
+          className="absolute inset-0 scrollbar-hide select-none overflow-auto"
+          style={ { clipPath: `url(#${ clipPathId })` } }
+          onContextMenu={ handleContextMenu }
+          onPointerDown={ handleMouseDown }
+          onPointerMove={ handleMouseMove }
+          onPointerUp={ handleMouseUp }
+          ref={ containerRef }
+        >
+          <svg width="0" height="0" className="absolute pointer-events-none">
+            <defs>
+              <clipPath id={ clipPathId } clipPathUnits="objectBoundingBox">
+                <path d={ currentShape.clipPathData } />
+              </clipPath>
+            </defs>
+          </svg>
         { boxes.map((box, index) => {
           const BoxComponent = getBoxComponent(box.type)
           const selected = index === selectedBoxIdx;
@@ -290,6 +295,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
             onClose={ () => setShowRadialMenu(false) }
           />
         ) }
+        </div>
       </div>
     </div>
   );
