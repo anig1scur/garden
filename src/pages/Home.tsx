@@ -12,6 +12,7 @@ const Garden: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [gardenId, setGardenId] = useState<string | null>(null);
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
+  const [shapeId, setShapeId] = useState<string>('mirror');
   const { mode } = useModeContext();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -74,10 +75,13 @@ const Garden: React.FC = () => {
       <Sidebar
         onSaveGarden={ handleSaveGarden }
         onNewBoxCreate={ (newBox) => handleNewBoxCreate(boxes, setBoxes, newBox) }
+        shapeId={ shapeId }
+        onShapeChange={ setShapeId }
       />
       <BoxContainer
         boxes={ boxes }
         mode={ mode }
+        shapeId={ shapeId }
         containerRef={ containerRef }
         selectedBoxIdx={ selectedBoxIndex }
         onDeleteBox={ deleteBox }

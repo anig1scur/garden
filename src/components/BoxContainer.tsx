@@ -13,6 +13,7 @@ interface BoxContainerProps {
   containerRef: React.RefObject<HTMLDivElement>;
   boxes: BoxItem[];
   mode: string;
+  shapeId: string;
   onBoxChange: (index: number, newPosition: Partial<BoxItem>) => void;
   onDeleteBox: (index: number) => void;
   selectedBoxIdx: number | null;
@@ -37,7 +38,7 @@ const getBoxComponent = (type?: string) => {
 
 const SQUARE_TYPES = ['smile'];
 
-const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, onBoxChange, onDeleteBox, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
+const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, shapeId, onBoxChange, onDeleteBox, selectedBoxIdx, setSelectedBoxIndex, onNewBoxCreate }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [currentPosition, setCurrentPosition] = useState<{ x: number; y: number } | null>(null);
@@ -164,7 +165,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
 
 
   // Dynamically resolve the right shape architecture based on mode. Default to mirror if not found.
-  const currentShape = SHAPE_CONFIGS[mode] || SHAPE_CONFIGS['mirror'];
+  const currentShape = SHAPE_CONFIGS[shapeId] || SHAPE_CONFIGS['mirror'];
   const FrameComponent = currentShape.FrameComponent;
   const clipPathId = `clipPath-${ currentShape.id }`;
 
@@ -186,7 +187,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
           <svg width="0" height="0" className="absolute pointer-events-none">
             <defs>
               <clipPath id={ clipPathId } clipPathUnits="objectBoundingBox">
-                <path d={ currentShape.clipPathData } />
+                { currentShape.clipPathNode }
               </clipPath>
             </defs>
           </svg>
