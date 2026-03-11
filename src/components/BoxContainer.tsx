@@ -69,9 +69,17 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
     const currentPositions = boxes.map(() => ({ x: 0, y: 0, scale: 0.8, opacity: 0.5 }));
 
     const animate = () => {
-      const mousePos = mousePosRef.current;
-
+      let activePos = mousePosRef.current;
       const time = Date.now() / 1000;
+
+      if (!activePos && containerRef.current) {
+        // Fallback to center focus when no active mouse/touch (Mobile style)
+        const container = containerRef.current;
+        activePos = {
+          x: container.offsetWidth / 2 + Math.sin(time * 0.8) * 30,
+          y: container.offsetHeight / 2 + Math.cos(time * 0.6) * 30
+        };
+      }
 
       boxes.forEach((box, i) => {
         // Continuous organic base jitter (floating)
@@ -85,15 +93,15 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
         let repelX = 0;
         let repelY = 0;
 
-        if (mousePos) {
+        if (activePos) {
           const boxCenterX = box.x + (box.width || BASE_SIZE) / 2;
           const boxCenterY = box.y + (box.height || BASE_SIZE) / 2;
 
-          const dX = boxCenterX - mousePos.x;
-          const dY = boxCenterY - mousePos.y;
+          const dX = boxCenterX - activePos.x;
+          const dY = boxCenterY - activePos.y;
           const dist = Math.sqrt(dX * dX + dY * dY);
 
-          const interactionRadius = 200;
+          const interactionRadius = 350;
 
           if (dist < interactionRadius) {
             const falloff = 1 - (dist / interactionRadius);
@@ -195,6 +203,17 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
           x: e.clientX - rect.left + container.scrollLeft,
           y: e.clientY - rect.top + container.scrollTop
         });
+      }
+    }
+
+    if (mode !== 'edit') {
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        mousePosRef.current = {
+          x: e.clientX - rect.left + container.scrollLeft,
+          y: e.clientY - rect.top + container.scrollTop
+        };
       }
     }
   };
