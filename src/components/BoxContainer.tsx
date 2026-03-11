@@ -46,6 +46,99 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
   const [radialMenuPosition, setRadialMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [newComponentType, setNewComponentType] = useState<BoxType>('rect');
 
+  const mousePosRef = useRef<{ x: number, y: number } | null>(null);
+  const viewingBoxRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    if (mode === 'edit') {
+      viewingBoxRefs.current.forEach(el => {
+        if (el) {
+          el.style.transform = '';
+          el.style.opacity = '';
+          el.style.zIndex = '';
+        }
+      });
+      return;
+    }
+
+    let animationFrameId: number;
+    let targetPositions = boxes.map(() => ({ x: 0, y: 0, scale: 0.8, opacity: 0.5 }));
+
+    // Smoothly interpolate current values towards target values to create the "lag/bounce" effect
+    // Combined with CSS transitions, this makes it incredibly silky.
+    const currentPositions = boxes.map(() => ({ x: 0, y: 0, scale: 0.8, opacity: 0.5 }));
+
+    const animate = () => {
+      const mousePos = mousePosRef.current;
+
+      const time = Date.now() / 1000;
+
+      boxes.forEach((box, i) => {
+        // Continuous organic base jitter (floating)
+        const jitterX = Math.sin(time * 0.5 + i) * 6;
+        const jitterY = Math.cos(time * 0.4 + i) * 6;
+
+        let targetScale = 0.75;
+        let targetOpacity = 0.6;
+        let zIndex = 1;
+
+        let repelX = 0;
+        let repelY = 0;
+
+        if (mousePos) {
+          const boxCenterX = box.x + (box.width || BASE_SIZE) / 2;
+          const boxCenterY = box.y + (box.height || BASE_SIZE) / 2;
+
+          const dX = boxCenterX - mousePos.x;
+          const dY = boxCenterY - mousePos.y;
+          const dist = Math.sqrt(dX * dX + dY * dY);
+
+          const interactionRadius = 200;
+
+          if (dist < interactionRadius) {
+            const falloff = 1 - (dist / interactionRadius);
+
+            targetScale = 0.75 + falloff * 0.45; // Max 1.2
+            targetOpacity = 0.5 + falloff * 0.4; // Max 1.0
+            zIndex = Math.round(falloff * 100) + 10;
+
+            const pullStrength = falloff * 0.15;
+            repelX = -dX * pullStrength;
+            repelY = -dY * pullStrength;
+          }
+        }
+
+        targetPositions[i] = {
+          x: jitterX + repelX,
+          y: jitterY + repelY,
+          scale: targetScale,
+          opacity: targetOpacity
+        };
+
+        // Linear interpolation (lerp) for buttery smoothness
+        currentPositions[i].x += (targetPositions[i].x - currentPositions[i].x) * 0.08;
+        currentPositions[i].y += (targetPositions[i].y - currentPositions[i].y) * 0.08;
+        // Scale and opacity are handled mostly by CSS transition, but we can lerp CSS variables too
+        currentPositions[i].scale += (targetPositions[i].scale - currentPositions[i].scale) * 0.1;
+        currentPositions[i].opacity += (targetPositions[i].opacity - currentPositions[i].opacity) * 0.1;
+
+        const el = viewingBoxRefs.current[i];
+        if (el) {
+          el.style.setProperty('--skill-tag-dynamic-scale', currentPositions[i].scale.toFixed(3));
+          el.style.setProperty('--skill-tag-dynamic-opacity', currentPositions[i].opacity.toFixed(3));
+          // Use Math.round to prevent sub-pixel antialiasing jitter on the font vectors
+          el.style.transform = `translate(${ Math.round(currentPositions[i].x) }px, ${ Math.round(currentPositions[i].y) }px)`;
+          el.style.zIndex = `${ zIndex }`;
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [mode, boxes]);
+
   const boxVariants: Variants = {
     hover: {
       scale: 1.25,
@@ -117,6 +210,23 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
         });
       }
     }
+
+    if (mode !== 'edit') {
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        mousePosRef.current = {
+          x: e.clientX - rect.left + container.scrollLeft,
+          y: e.clientY - rect.top + container.scrollTop
+        };
+      }
+    }
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (mode !== 'edit') {
+      mousePosRef.current = null;
+    }
   };
 
   // 如何让 clipPath 也和设置了 preserveAspectRatio 的svg一样自适应？  react tsc tailwind 例子 
@@ -182,6 +292,7 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
           onPointerDown={ handleMouseDown }
           onPointerMove={ handleMouseMove }
           onPointerUp={ handleMouseUp }
+          onPointerLeave={ handleMouseLeave }
           ref={ containerRef }
         >
           <svg width="0" height="0" className="absolute pointer-events-none">
@@ -191,10 +302,10 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
               </clipPath>
             </defs>
           </svg>
-        { boxes.map((box, index) => {
+          { mode === 'edit' ? boxes.map((box, index) => {
           const BoxComponent = getBoxComponent(box.type)
           const selected = index === selectedBoxIdx;
-          return mode === 'edit' ? (
+            return (
             <Rnd
               key={ index }
               default={ { x: box.x, y: box.y, width: box.width, height: box.height } }
@@ -259,16 +370,40 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
                 <BoxEditor show={ selected } selectedBox={ box } onBoxChange={ (updatedBox) => onBoxChange(index, updatedBox) } />
               </motion.div>
             </Rnd>
-          ) : (
+            )
+          }) : boxes.map((box, index) => {
+            const BoxComponent = getBoxComponent(box.type)
+            return (
             <motion.div
               key={ index }
+                ref={ (el) => (viewingBoxRefs.current[index] = el) }
               initial="rest"
               whileHover="hover"
               animate="rest"
               variants={ boxVariants }
-              style={ { position: 'absolute', left: box.x, top: box.y } }
-            >
-              <BoxComponent { ...box } />
+                style={ {
+                  position: 'absolute',
+                  left: box.x,
+                  top: box.y,
+                  width: box.width,
+                  height: box.height,
+                  transformOrigin: 'center center',
+                  willChange: 'transform, opacity, z-index',
+                  transition: 'transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 500ms ease-out',
+                  opacity: 'var(--skill-tag-dynamic-opacity, 0.5)'
+                } }
+              >
+                <div
+                  className="w-full h-full pointer-events-none"
+                  style={ {
+                    transform: 'scale(var(--skill-tag-dynamic-scale, 1))',
+                    transition: 'transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    transformOrigin: 'center center',
+                    willChange: 'transform' // Sometimes it's better to keep this and just fix the SVG geometric precision
+                  } }
+                >
+                  <BoxComponent { ...box } width={ box.width } height={ box.height } />
+                </div>
               <motion.div
                 className='absolute backdrop-blur-sm top-[100%] right-0 p-3 bg-white bg-opacity-50'
                 variants={ hoverDisplayVariants }

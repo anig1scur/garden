@@ -18,8 +18,8 @@ const extractInfo = (svgString: string): SvgInfo => {
   return { pathD, width, height, viewBox };
 };
 
-const calculateFontSize = (containerWidth: number, containerHeight: number, textLength: number): number => {
-  const pathLength = Math.sqrt(containerWidth * containerWidth + containerHeight * containerHeight);
+const calculateFontSize = (svgWidth: number, svgHeight: number, textLength: number): number => {
+  const pathLength = Math.sqrt(svgWidth * svgWidth + svgHeight * svgHeight);
   const spacePerChar = pathLength / textLength;
   return spacePerChar * 0.8;
 };
@@ -35,7 +35,6 @@ const Curve: React.FC<CurveProps> = ({
   strokeWidth = 36,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerSize, setContainerSize] = useState<ContainerSize>({ width, height });
   const [svgInfo, setSvgInfo] = useState<SvgInfo>({
     pathD: '',
     width: width,
@@ -59,21 +58,6 @@ const Curve: React.FC<CurveProps> = ({
     };
 
     loadSVG();
-
-    const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        const { width, height } = entry.contentRect;
-        setContainerSize({ width, height });
-      }
-    });
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
   }, [curveType]);
 
   if (!svgInfo.pathD) {
@@ -86,7 +70,7 @@ const Curve: React.FC<CurveProps> = ({
 
   return (
     <div ref={ containerRef } style={ { width, height } } className={ className }>
-      <svg width="100%" height="100%" viewBox={ viewBox } preserveAspectRatio="xMidYMid meet">
+      <svg width="100%" height="100%" viewBox={ viewBox } preserveAspectRatio="xMidYMid meet" style={ { overflow: 'visible', shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision' } }>
         <path
           d={ pathD }
           stroke={ bgColor }
