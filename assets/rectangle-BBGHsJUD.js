@@ -1,0 +1,4 @@
+const t=`<svg viewBox="0 0 300 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="15" y="15" width="270" height="470" rx="30" stroke="currentColor" stroke-width="8" />
+</svg>
+`;export{t as default};

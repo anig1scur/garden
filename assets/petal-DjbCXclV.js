@@ -1,0 +1,4 @@
+const o=`<svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 200 380 C 100 300 20 180 80 80 C 100 40 170 40 200 100 C 230 40 300 40 320 80 C 380 180 300 300 200 380 Z" stroke="currentColor" stroke-width="8" stroke-linejoin="round" />
+</svg>
+`;export{o as default};
