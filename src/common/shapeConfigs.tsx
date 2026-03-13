@@ -6,9 +6,9 @@ import { ReactComponent as RectangleSvg } from '@assets/rectangle.svg';
 
 export interface ShapeConfig {
   id: string;
-  FrameComponent: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  aspectRatioString: string;
-  clipPathNode: React.ReactNode;
+  FrameComponent?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  aspectRatioString?: string;
+  clipPathNode?: React.ReactNode;
 }
 
 export const SHAPE_CONFIGS: Record<string, ShapeConfig> = {
@@ -35,5 +35,8 @@ export const SHAPE_CONFIGS: Record<string, ShapeConfig> = {
     FrameComponent: RectangleSvg,
     aspectRatioString: '300/500',
     clipPathNode: <rect x="0.05" y = "0.03" width="0.9" height="0.94" rx="0.1" ry="0.06" />
+  },
+  none: {
+    id: 'none',
   }
 };

@@ -299,14 +299,17 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
   const clipPathId = `clipPath-${ currentShape.id }`;
 
   return (
-    <div className="mt-5 relative mx-auto flex justify-center items-center max-w-[90svw] h-[90svh]">
-      <div className="relative h-full flex justify-center items-center" style={ { aspectRatio: currentShape.aspectRatioString } }>
+    <div className={ `relative mx-auto flex justify-center items-center ${ shapeId === 'none' ? 'w-full h-full' : 'mt-5 max-w-[90svw] h-[90svh]' }` }>
+      <div 
+        className={ `relative flex justify-center items-center ${ shapeId === 'none' ? 'w-full h-full' : 'h-full' }` } 
+        style={ currentShape.aspectRatioString ? { aspectRatio: currentShape.aspectRatioString } : {} }
+      >
         {/* Overlay full dynamic shape image via SVGR so its border and details render over the clipped box bounds perfectly without getting clipped, AND inheriting the CSS color through currentColor */ }
-        <FrameComponent className="absolute inset-0 w-full h-full pointer-events-none z-10 text-yellow-800" />
+        { FrameComponent && <FrameComponent className="absolute inset-0 w-full h-full pointer-events-none z-10 text-yellow-800" /> }
 
         <div
           className="absolute inset-0 scrollbar-hide select-none overflow-auto"
-          style={ { clipPath: `url(#${ clipPathId })` } }
+          style={ currentShape.clipPathNode ? { clipPath: `url(#${ clipPathId })` } : {} }
           onContextMenu={ handleContextMenu }
           onPointerDown={ handleMouseDown }
           onPointerMove={ handleMouseMove }
@@ -314,13 +317,15 @@ const BoxContainer: React.FC<BoxContainerProps> = ({ containerRef, boxes, mode, 
           onPointerLeave={ handleMouseLeave }
           ref={ containerRef }
         >
-          <svg width="0" height="0" className="absolute pointer-events-none">
-            <defs>
-              <clipPath id={ clipPathId } clipPathUnits="objectBoundingBox">
-                { currentShape.clipPathNode }
-              </clipPath>
-            </defs>
-          </svg>
+          { currentShape.clipPathNode && (
+            <svg width="0" height="0" className="absolute pointer-events-none">
+              <defs>
+                <clipPath id={ clipPathId } clipPathUnits="objectBoundingBox">
+                  { currentShape.clipPathNode }
+                </clipPath>
+              </defs>
+            </svg>
+          ) }
           { mode === 'edit' ? boxes.map((box, index) => {
           const BoxComponent = getBoxComponent(box.type)
           const selected = index === selectedBoxIdx;

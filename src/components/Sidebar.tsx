@@ -31,8 +31,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onSaveGarden, onNewBoxCreate, shapeId
   const { mode, toggleMode } = useModeContext();
 
   return (
-    <div className="w-64 text-white p-4 overflow-y-auto z-50 absolute flex-grow flex-shrink-0">
-      <div className='flex mt-5 gap-10 flex-col items-start'>
+    <div className="w-64 pointer-events-none text-white p-4 overflow-y-auto z-50 absolute flex-grow flex-shrink-0">
+      <div className='flex mt-5 gap-10 flex-col items-start pointer-events-auto'>
         <div className='flex gap-3 items-center'>
           <div className='bg-logo w-8 h-8 bg-contain' />
           <div className='text-4xl font-bold text-pink-500'>Garden</div>
